@@ -1,0 +1,9 @@
+<XamlCompilerSaveState>
+  <ReferenceAssemblyList>
+    <LocalAssembly PathName="c:\users\josh\repos\wasteof.phone\wasteof.phone\obj\release\intermediatexaml\wasteof.phone.exe" HashGuid="31a204fc-ae82-c322-b97e-3070b9e79f14" />
+    <ReferenceAssembly PathName="c:\users\josh\repos\wasteof.phone\packages\newtonsoft.json.12.0.3\lib\portable-net45+win8+wp8+wpa81\newtonsoft.json.dll" HashGuid="b4d39e5f-5a76-ba48-e4b0-ee705f802492" />
+    <ReferenceAssembly PathName="c:\users\josh\repos\wasteof.phone\packages\system.componentmodel.primitives.4.3.0\lib\netstandard1.0\system.componentmodel.primitives.dll" HashGuid="28089d85-cb33-2904-70b1-ec0ef44b2ca6" />
+    <ReferenceAssembly PathName="c:\users\josh\repos\wasteof.phone\packages\system.componentmodel.typeconverter.4.3.0\lib\netstandard1.0\system.componentmodel.typeconverter.dll" HashGuid="08b99511-c07e-5b17-e83a-bed2f1a20b61" />
+    <ReferenceAssembly PathName="c:\users\josh\repos\wasteof.phone\packages\system.runtime.interopservices.runtimeinformation.4.3.0\lib\wpa81\system.runtime.interopservices.runtimeinformation.dll" HashGuid="6560d00f-0bb0-0755-5423-c4e1bf779127" />
+  </ReferenceAssemblyList>
+</XamlCompilerSaveState>
