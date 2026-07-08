@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:wasteof.phone"
     xmlns:models="using:wasteof.phone.Models"
+    xmlns:helpers="using:wasteof.phone.Helpers"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
@@ -18,63 +19,73 @@
                     <ListView x:Name="FeedListView" IsItemClickEnabled="True" ItemClick="PostListView_ItemClick" HorizontalContentAlignment="Stretch">
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Grid Margin="19,8,19,16" HorizontalAlignment="Stretch">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
+                                <StackPanel Margin="19,8,19,16" HorizontalAlignment="Stretch">
+                                    <TextBlock Text="{Binding RepostHeader}" Visibility="{Binding RepostHeaderVisibility}" FontSize="12" Foreground="{ThemeResource PhoneMutedBrush}" Margin="0,0,0,4"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
 
-                                    <Border Width="40" Height="40" VerticalAlignment="Top" Margin="0,0,12,0" Background="{ThemeResource PhoneBorderBrush}" Tapped="Username_Tapped">
-                                        <Image Source="{Binding Poster.ProfilePictureUrl}" Width="40" Height="40" Stretch="UniformToFill"/>
-                                    </Border>
-
-                                    <StackPanel Grid.Column="1" HorizontalAlignment="Stretch">
-                                        <Grid Margin="0,0,0,4">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Text="{Binding Poster.Name}" FontWeight="Bold" Style="{ThemeResource BodyTextBlockStyle}" Foreground="{StaticResource PhoneAccentBrush}" Tapped="Username_Tapped"/>
-                                            <TextBlock Grid.Column="1" Text="{Binding FormattedTime}" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{StaticResource PhoneMutedBrush}"/>
-                                        </Grid>
-                                        
-                                        <TextBlock Text="{Binding CleanContent}" TextWrapping="Wrap" MaxLines="3" TextTrimming="WordEllipsis" Style="{ThemeResource BodyTextBlockStyle}"/>
-                                        
-                                        <Border BorderBrush="{StaticResource PhoneAccentBrush}" BorderThickness="2,0,0,0" Padding="6,0,0,0" Margin="0,4,0,4" Visibility="{Binding Repost, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}">
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding Repost.Poster.Name}" FontWeight="SemiBold" Style="{ThemeResource CaptionTextBlockStyle}"/>
-                                                <TextBlock Text="{Binding Repost.CleanContent}" TextWrapping="Wrap" MaxLines="2" TextTrimming="WordEllipsis" Style="{ThemeResource CaptionTextBlockStyle}"/>
-                                            </StackPanel>
+                                        <Border Width="40" Height="40" VerticalAlignment="Top" Margin="0,0,12,0" Background="{ThemeResource PhoneBorderBrush}" Tapped="Username_Tapped">
+                                            <Image Source="{Binding DisplayPoster.ProfilePictureUrl}" Width="40" Height="40" Stretch="UniformToFill"/>
                                         </Border>
 
-                                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                            <Button Click="LoveButton_Click" Width="80" Margin="0,0,12,0" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <Path Data="M 12,5 C 10,3 6,3 4,5 C 2,7 2,11 4,13 L 12,21 L 20,13 C 22,11 22,7 20,5 C 18,3 14,3 12,5 Z" Stroke="{Binding LoveHeartStroke}" StrokeThickness="2" Fill="{Binding LoveHeartFill}" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                                    <TextBlock Text="{Binding LovesCount}" Style="{ThemeResource CaptionTextBlockStyle}" VerticalAlignment="Center"/>
-                                                </StackPanel>
-                                            </Button>
+                                        <StackPanel Grid.Column="1" HorizontalAlignment="Stretch">
+                                            <Grid Margin="0,0,0,4">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding DisplayPoster.Name}" FontWeight="Bold" Style="{ThemeResource BodyTextBlockStyle}" Foreground="{StaticResource PhoneAccentBrush}" Tapped="Username_Tapped"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding DisplayTime}" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource PhoneMutedBrush}"/>
+                                            </Grid>
 
-                                            <Button Click="CommentButton_Click" Width="80" Margin="0,0,12,0" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <Path Data="M 2,4 L 22,4 L 22,16 L 8,16 L 3,21 L 3,16 L 2,16 Z" Stroke="{ThemeResource PhoneMutedBrush}" StrokeThickness="2" Fill="Transparent" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                                    <TextBlock Text="{Binding CommentsCount}" Style="{ThemeResource CaptionTextBlockStyle}" VerticalAlignment="Center"/>
-                                                </StackPanel>
-                                            </Button>
+                                            <RichTextBlock helpers:HtmlHelper.Html="{Binding DisplayHtml}" FontSize="15" TextWrapping="Wrap"/>
 
-                                            <Button Click="RepostButton_Click" Width="80" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <Path Data="M 4,12 L 4,7 C 4,5 5,4 7,4 L 17,4 M 13,1 L 18,4 L 13,7 M 16,8 L 16,13 C 16,15 15,16 13,16 L 3,16 M 7,13 L 2,16 L 7,19" Stroke="{ThemeResource PhoneMutedBrush}" StrokeThickness="2" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0">
-                                                        <Path.RenderTransform>
-                                                            <RotateTransform Angle="-30" CenterX="9" CenterY="9"/>
-                                                        </Path.RenderTransform>
-                                                    </Path>
-                                                    <TextBlock Text="{Binding RepostsCount}" Style="{ThemeResource CaptionTextBlockStyle}" VerticalAlignment="Center"/>
+                                            <!-- Image Display -->
+                                            <Image Source="{Binding DisplayFirstImageUrl}" MaxHeight="200" Stretch="UniformToFill" HorizontalAlignment="Left" Margin="0,8,0,0" Visibility="{Binding DisplayImageVisibility}"/>
+
+                                            <Border BorderBrush="{StaticResource PhoneAccentBrush}" BorderThickness="2,0,0,0" Padding="6,0,0,0" Margin="0,4,0,4" Visibility="{Binding NormalRepostBorderVisibility}">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Repost.Poster.Name}" FontWeight="SemiBold" Style="{ThemeResource CaptionTextBlockStyle}"/>
+                                                    <RichTextBlock helpers:HtmlHelper.Html="{Binding Repost.Content}" FontSize="12" Foreground="{ThemeResource PhoneMutedBrush}" TextWrapping="Wrap"/>
                                                 </StackPanel>
-                                            </Button>
+                                            </Border>
+
+                                            <!-- Stat Buttons Row -->
+                                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                                <!-- Love Button -->
+                                                <Button Click="LoveButton_Click" Width="80" Margin="0,0,12,0" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Path Data="M 12,5 C 10,3 6,3 4,5 C 2,7 2,11 4,13 L 12,21 L 20,13 C 22,11 22,7 20,5 C 18,3 14,3 12,5 Z" Stroke="{Binding DisplayLoveHeartStroke}" StrokeThickness="2" Fill="{Binding DisplayLoveHeartFill}" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                                        <TextBlock Text="{Binding DisplayLovesCount}" Style="{ThemeResource CaptionTextBlockStyle}" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </Button>
+
+                                                <!-- Comment Button -->
+                                                <Button Click="CommentButton_Click" Width="80" Margin="0,0,12,0" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Path Data="M 2,4 L 22,4 L 22,16 L 8,16 L 3,21 L 3,16 L 2,16 Z" Stroke="{ThemeResource PhoneMutedBrush}" StrokeThickness="2" Fill="Transparent" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                                        <TextBlock Text="{Binding DisplayCommentsCount}" Style="{ThemeResource CaptionTextBlockStyle}" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </Button>
+
+                                                <!-- Repost Button -->
+                                                <Button Click="RepostButton_Click" Width="80" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Path Data="M 4,12 L 4,7 C 4,5 5,4 7,4 L 17,4 M 13,1 L 18,4 L 13,7 M 16,8 L 16,13 C 16,15 15,16 13,16 L 3,16 M 7,13 L 2,16 L 7,19" Stroke="{ThemeResource PhoneMutedBrush}" StrokeThickness="2" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0">
+                                                            <Path.RenderTransform>
+                                                                <RotateTransform Angle="-30" CenterX="9" CenterY="9"/>
+                                                            </Path.RenderTransform>
+                                                        </Path>
+                                                        <TextBlock Text="{Binding DisplayRepostsCount}" Style="{ThemeResource CaptionTextBlockStyle}" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </Button>
+                                            </StackPanel>
                                         </StackPanel>
-                                    </StackPanel>
-                                </Grid>
+                                    </Grid>
+                                </StackPanel>
                             </DataTemplate>
                         </ListView.ItemTemplate>
                         <ListView.Footer>
@@ -90,56 +101,73 @@
                     <ListView x:Name="ExploreListView" IsItemClickEnabled="True" ItemClick="PostListView_ItemClick" HorizontalContentAlignment="Stretch">
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Grid Margin="19,8,19,16" HorizontalAlignment="Stretch">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
+                                <StackPanel Margin="19,8,19,16" HorizontalAlignment="Stretch">
+                                    <TextBlock Text="{Binding RepostHeader}" Visibility="{Binding RepostHeaderVisibility}" FontSize="12" Foreground="{ThemeResource PhoneMutedBrush}" Margin="0,0,0,4"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
 
-                                    <Border Width="40" Height="40" VerticalAlignment="Top" Margin="0,0,12,0" Background="{ThemeResource PhoneBorderBrush}" Tapped="Username_Tapped">
-                                        <Image Source="{Binding Poster.ProfilePictureUrl}" Width="40" Height="40" Stretch="UniformToFill"/>
-                                    </Border>
+                                        <Border Width="40" Height="40" VerticalAlignment="Top" Margin="0,0,12,0" Background="{ThemeResource PhoneBorderBrush}" Tapped="Username_Tapped">
+                                            <Image Source="{Binding DisplayPoster.ProfilePictureUrl}" Width="40" Height="40" Stretch="UniformToFill"/>
+                                        </Border>
 
-                                    <StackPanel Grid.Column="1" HorizontalAlignment="Stretch">
-                                        <Grid Margin="0,0,0,4">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Text="{Binding Poster.Name}" FontWeight="Bold" Style="{ThemeResource BodyTextBlockStyle}" Foreground="{StaticResource PhoneAccentBrush}" Tapped="Username_Tapped"/>
-                                            <TextBlock Grid.Column="1" Text="{Binding FormattedTime}" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{StaticResource PhoneMutedBrush}"/>
-                                        </Grid>
-                                        
-                                        <TextBlock Text="{Binding CleanContent}" TextWrapping="Wrap" MaxLines="3" TextTrimming="WordEllipsis" Style="{ThemeResource BodyTextBlockStyle}"/>
-                                        
-                                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                            <Button Click="LoveButton_Click" Width="80" Margin="0,0,12,0" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <Path Data="M 12,5 C 10,3 6,3 4,5 C 2,7 2,11 4,13 L 12,21 L 20,13 C 22,11 22,7 20,5 C 18,3 14,3 12,5 Z" Stroke="{Binding LoveHeartStroke}" StrokeThickness="2" Fill="{Binding LoveHeartFill}" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                                    <TextBlock Text="{Binding LovesCount}" Style="{ThemeResource CaptionTextBlockStyle}" VerticalAlignment="Center"/>
+                                        <StackPanel Grid.Column="1" HorizontalAlignment="Stretch">
+                                            <Grid Margin="0,0,0,4">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding DisplayPoster.Name}" FontWeight="Bold" Style="{ThemeResource BodyTextBlockStyle}" Foreground="{StaticResource PhoneAccentBrush}" Tapped="Username_Tapped"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding DisplayTime}" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource PhoneMutedBrush}"/>
+                                            </Grid>
+
+                                            <RichTextBlock helpers:HtmlHelper.Html="{Binding DisplayHtml}" FontSize="15" TextWrapping="Wrap"/>
+
+                                            <!-- Image Display -->
+                                            <Image Source="{Binding DisplayFirstImageUrl}" MaxHeight="200" Stretch="UniformToFill" HorizontalAlignment="Left" Margin="0,8,0,0" Visibility="{Binding DisplayImageVisibility}"/>
+
+                                            <Border BorderBrush="{StaticResource PhoneAccentBrush}" BorderThickness="2,0,0,0" Padding="6,0,0,0" Margin="0,4,0,4" Visibility="{Binding NormalRepostBorderVisibility}">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Repost.Poster.Name}" FontWeight="SemiBold" Style="{ThemeResource CaptionTextBlockStyle}"/>
+                                                    <RichTextBlock helpers:HtmlHelper.Html="{Binding Repost.Content}" FontSize="12" Foreground="{ThemeResource PhoneMutedBrush}" TextWrapping="Wrap"/>
                                                 </StackPanel>
-                                            </Button>
+                                            </Border>
 
-                                            <Button Click="CommentButton_Click" Width="80" Margin="0,0,12,0" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <Path Data="M 2,4 L 22,4 L 22,16 L 8,16 L 3,21 L 3,16 L 2,16 Z" Stroke="{ThemeResource PhoneMutedBrush}" StrokeThickness="2" Fill="Transparent" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                                    <TextBlock Text="{Binding CommentsCount}" Style="{ThemeResource CaptionTextBlockStyle}" VerticalAlignment="Center"/>
-                                                </StackPanel>
-                                            </Button>
+                                            <!-- Stat Buttons Row -->
+                                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                                <!-- Love Button -->
+                                                <Button Click="LoveButton_Click" Width="80" Margin="0,0,12,0" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Path Data="M 12,5 C 10,3 6,3 4,5 C 2,7 2,11 4,13 L 12,21 L 20,13 C 22,11 22,7 20,5 C 18,3 14,3 12,5 Z" Stroke="{Binding DisplayLoveHeartStroke}" StrokeThickness="2" Fill="{Binding DisplayLoveHeartFill}" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                                        <TextBlock Text="{Binding DisplayLovesCount}" Style="{ThemeResource CaptionTextBlockStyle}" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </Button>
 
-                                            <Button Click="RepostButton_Click" Width="80" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <Path Data="M 4,12 L 4,7 C 4,5 5,4 7,4 L 17,4 M 13,1 L 18,4 L 13,7 M 16,8 L 16,13 C 16,15 15,16 13,16 L 3,16 M 7,13 L 2,16 L 7,19" Stroke="{ThemeResource PhoneMutedBrush}" StrokeThickness="2" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0">
-                                                        <Path.RenderTransform>
-                                                            <RotateTransform Angle="-30" CenterX="9" CenterY="9"/>
-                                                        </Path.RenderTransform>
-                                                    </Path>
-                                                    <TextBlock Text="{Binding RepostsCount}" Style="{ThemeResource CaptionTextBlockStyle}" VerticalAlignment="Center"/>
-                                                </StackPanel>
-                                            </Button>
+                                                <!-- Comment Button -->
+                                                <Button Click="CommentButton_Click" Width="80" Margin="0,0,12,0" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Path Data="M 2,4 L 22,4 L 22,16 L 8,16 L 3,21 L 3,16 L 2,16 Z" Stroke="{ThemeResource PhoneMutedBrush}" StrokeThickness="2" Fill="Transparent" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                                        <TextBlock Text="{Binding DisplayCommentsCount}" Style="{ThemeResource CaptionTextBlockStyle}" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </Button>
+
+                                                <!-- Repost Button -->
+                                                <Button Click="RepostButton_Click" Width="80" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Path Data="M 4,12 L 4,7 C 4,5 5,4 7,4 L 17,4 M 13,1 L 18,4 L 13,7 M 16,8 L 16,13 C 16,15 15,16 13,16 L 3,16 M 7,13 L 2,16 L 7,19" Stroke="{ThemeResource PhoneMutedBrush}" StrokeThickness="2" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0">
+                                                            <Path.RenderTransform>
+                                                                <RotateTransform Angle="-30" CenterX="9" CenterY="9"/>
+                                                            </Path.RenderTransform>
+                                                        </Path>
+                                                        <TextBlock Text="{Binding DisplayRepostsCount}" Style="{ThemeResource CaptionTextBlockStyle}" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </Button>
+                                            </StackPanel>
                                         </StackPanel>
-                                    </StackPanel>
-                                </Grid>
+                                    </Grid>
+                                </StackPanel>
                             </DataTemplate>
                         </ListView.ItemTemplate>
                         <ListView.Footer>
@@ -201,55 +229,73 @@
 
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Grid Margin="19,8,19,16" HorizontalAlignment="Stretch">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
+                                <StackPanel Margin="19,8,19,16" HorizontalAlignment="Stretch">
+                                    <TextBlock Text="{Binding RepostHeader}" Visibility="{Binding RepostHeaderVisibility}" FontSize="12" Foreground="{ThemeResource PhoneMutedBrush}" Margin="0,0,0,4"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
 
-                                    <Border Width="40" Height="40" VerticalAlignment="Top" Margin="0,0,12,0" Background="{ThemeResource PhoneBorderBrush}">
-                                        <Image Source="{Binding Poster.ProfilePictureUrl}" Width="40" Height="40" Stretch="UniformToFill"/>
-                                    </Border>
+                                        <Border Width="40" Height="40" VerticalAlignment="Top" Margin="0,0,12,0" Background="{ThemeResource PhoneBorderBrush}">
+                                            <Image Source="{Binding DisplayPoster.ProfilePictureUrl}" Width="40" Height="40" Stretch="UniformToFill"/>
+                                        </Border>
 
-                                    <StackPanel Grid.Column="1" HorizontalAlignment="Stretch">
-                                        <Grid Margin="0,0,0,4">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Text="{Binding Poster.Name}" FontWeight="Bold" Style="{ThemeResource BodyTextBlockStyle}" Foreground="{StaticResource PhoneAccentBrush}"/>
-                                            <TextBlock Grid.Column="1" Text="{Binding FormattedTime}" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{StaticResource PhoneMutedBrush}"/>
-                                        </Grid>
-                                        <TextBlock Text="{Binding CleanContent}" TextWrapping="Wrap" MaxLines="3" TextTrimming="WordEllipsis" Style="{ThemeResource BodyTextBlockStyle}"/>
-                                        
-                                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                            <Button Click="LoveButton_Click" Width="80" Margin="0,0,12,0" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <Path Data="M 12,5 C 10,3 6,3 4,5 C 2,7 2,11 4,13 L 12,21 L 20,13 C 22,11 22,7 20,5 C 18,3 14,3 12,5 Z" Stroke="{Binding LoveHeartStroke}" StrokeThickness="2" Fill="{Binding LoveHeartFill}" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                                    <TextBlock Text="{Binding LovesCount}" Style="{ThemeResource CaptionTextBlockStyle}" VerticalAlignment="Center"/>
+                                        <StackPanel Grid.Column="1" HorizontalAlignment="Stretch">
+                                            <Grid Margin="0,0,0,4">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding DisplayPoster.Name}" FontWeight="Bold" Style="{ThemeResource BodyTextBlockStyle}" Foreground="{StaticResource PhoneAccentBrush}"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding DisplayTime}" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource PhoneMutedBrush}"/>
+                                            </Grid>
+
+                                            <RichTextBlock helpers:HtmlHelper.Html="{Binding DisplayHtml}" FontSize="15" TextWrapping="Wrap"/>
+
+                                            <!-- Image Display -->
+                                            <Image Source="{Binding DisplayFirstImageUrl}" MaxHeight="200" Stretch="UniformToFill" HorizontalAlignment="Left" Margin="0,8,0,0" Visibility="{Binding DisplayImageVisibility}"/>
+
+                                            <Border BorderBrush="{StaticResource PhoneAccentBrush}" BorderThickness="2,0,0,0" Padding="6,0,0,0" Margin="0,4,0,4" Visibility="{Binding NormalRepostBorderVisibility}">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Repost.Poster.Name}" FontWeight="SemiBold" Style="{ThemeResource CaptionTextBlockStyle}"/>
+                                                    <RichTextBlock helpers:HtmlHelper.Html="{Binding Repost.Content}" FontSize="12" Foreground="{ThemeResource PhoneMutedBrush}" TextWrapping="Wrap"/>
                                                 </StackPanel>
-                                            </Button>
+                                            </Border>
 
-                                            <Button Click="CommentButton_Click" Width="80" Margin="0,0,12,0" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <Path Data="M 2,4 L 22,4 L 22,16 L 8,16 L 3,21 L 3,16 L 2,16 Z" Stroke="{ThemeResource PhoneMutedBrush}" StrokeThickness="2" Fill="Transparent" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                                    <TextBlock Text="{Binding CommentsCount}" Style="{ThemeResource CaptionTextBlockStyle}" VerticalAlignment="Center"/>
-                                                </StackPanel>
-                                            </Button>
+                                            <!-- Stat Buttons Row -->
+                                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                                <!-- Love Button -->
+                                                <Button Click="LoveButton_Click" Width="80" Margin="0,0,12,0" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Path Data="M 12,5 C 10,3 6,3 4,5 C 2,7 2,11 4,13 L 12,21 L 20,13 C 22,11 22,7 20,5 C 18,3 14,3 12,5 Z" Stroke="{Binding DisplayLoveHeartStroke}" StrokeThickness="2" Fill="{Binding DisplayLoveHeartFill}" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                                        <TextBlock Text="{Binding DisplayLovesCount}" Style="{ThemeResource CaptionTextBlockStyle}" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </Button>
 
-                                            <Button Click="RepostButton_Click" Width="80" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <Path Data="M 4,12 L 4,7 C 4,5 5,4 7,4 L 17,4 M 13,1 L 18,4 L 13,7 M 16,8 L 16,13 C 16,15 15,16 13,16 L 3,16 M 7,13 L 2,16 L 7,19" Stroke="{ThemeResource PhoneMutedBrush}" StrokeThickness="2" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0">
-                                                        <Path.RenderTransform>
-                                                            <RotateTransform Angle="-30" CenterX="9" CenterY="9"/>
-                                                        </Path.RenderTransform>
-                                                    </Path>
-                                                    <TextBlock Text="{Binding RepostsCount}" Style="{ThemeResource CaptionTextBlockStyle}" VerticalAlignment="Center"/>
-                                                </StackPanel>
-                                            </Button>
+                                                <!-- Comment Button -->
+                                                <Button Click="CommentButton_Click" Width="80" Margin="0,0,12,0" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Path Data="M 2,4 L 22,4 L 22,16 L 8,16 L 3,21 L 3,16 L 2,16 Z" Stroke="{ThemeResource PhoneMutedBrush}" StrokeThickness="2" Fill="Transparent" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                                        <TextBlock Text="{Binding DisplayCommentsCount}" Style="{ThemeResource CaptionTextBlockStyle}" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </Button>
+
+                                                <!-- Repost Button -->
+                                                <Button Click="RepostButton_Click" Width="80" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Path Data="M 4,12 L 4,7 C 4,5 5,4 7,4 L 17,4 M 13,1 L 18,4 L 13,7 M 16,8 L 16,13 C 16,15 15,16 13,16 L 3,16 M 7,13 L 2,16 L 7,19" Stroke="{ThemeResource PhoneMutedBrush}" StrokeThickness="2" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0">
+                                                            <Path.RenderTransform>
+                                                                <RotateTransform Angle="-30" CenterX="9" CenterY="9"/>
+                                                            </Path.RenderTransform>
+                                                        </Path>
+                                                        <TextBlock Text="{Binding DisplayRepostsCount}" Style="{ThemeResource CaptionTextBlockStyle}" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </Button>
+                                            </StackPanel>
                                         </StackPanel>
-                                    </StackPanel>
-                                </Grid>
+                                    </Grid>
+                                </StackPanel>
                             </DataTemplate>
                         </ListView.ItemTemplate>
                         <ListView.Footer>

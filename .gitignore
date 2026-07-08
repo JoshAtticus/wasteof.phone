@@ -1,9 +1,37 @@
-/.vs
-/packages
-*.appx
-*.appxupload
-*.appxsym
-*.exe
-*.pdb
-obj/*
-bin/*
+## User-specific files
+*.rsuser
+*.suo
+*.user
+*.userresourcecode
+*.usertasks
+
+## Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+arm/
+arm64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## Visual Studio cache/options directory
+.vs/
+
+## MSTest test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Cc]omputer*/
+
+## AppPackages (sideloading output)
+AppPackages/
+BundleArtifacts/
+
+## NuGet Packages
+*.nuget.props
+*.nuget.targets
+packages/

@@ -99,8 +99,18 @@ namespace wasteof.phone
             {
                 if (post != null)
                 {
-                    var loved = await ApiService.Instance.GetPostLoveStatusAsync(post.Id, username);
-                    post.IsLoving = loved;
+                    if (post.IsEmptyRepost && post.Repost != null)
+                    {
+                        var loved = await ApiService.Instance.GetPostLoveStatusAsync(post.Repost.Id, username);
+                        post.Repost.IsLoving = loved;
+                        post.RaisePropertyChanged("DisplayLoveHeartFill");
+                        post.RaisePropertyChanged("DisplayLoveHeartStroke");
+                    }
+                    else
+                    {
+                        var loved = await ApiService.Instance.GetPostLoveStatusAsync(post.Id, username);
+                        post.IsLoving = loved;
+                    }
                 }
             }
         }
@@ -148,7 +158,8 @@ namespace wasteof.phone
             var post = e.ClickedItem as Post;
             if (post != null)
             {
-                Frame.Navigate(typeof(PostDetailsPage), post.Id);
+                var targetPost = (post.IsEmptyRepost && post.Repost != null) ? post.Repost : post;
+                Frame.Navigate(typeof(PostDetailsPage), targetPost.Id);
             }
         }
 
@@ -176,12 +187,20 @@ namespace wasteof.phone
                 return;
             }
 
+            var targetPost = (post.IsEmptyRepost && post.Repost != null) ? post.Repost : post;
+
             button.IsEnabled = false;
-            var response = await ApiService.Instance.ToggleLoveAsync(post.Id);
+            var response = await ApiService.Instance.ToggleLoveAsync(targetPost.Id);
             if (response != null && response.NewState != null)
             {
-                post.IsLoving = response.NewState.IsLoving;
-                post.LovesCount = response.NewState.Loves;
+                targetPost.IsLoving = response.NewState.IsLoving;
+                targetPost.LovesCount = response.NewState.Loves;
+                if (post.IsEmptyRepost)
+                {
+                    post.RaisePropertyChanged("DisplayLovesCount");
+                    post.RaisePropertyChanged("DisplayLoveHeartFill");
+                    post.RaisePropertyChanged("DisplayLoveHeartStroke");
+                }
             }
             button.IsEnabled = true;
         }
@@ -194,7 +213,8 @@ namespace wasteof.phone
             var post = button.DataContext as Post;
             if (post != null)
             {
-                Frame.Navigate(typeof(PostDetailsPage), post.Id);
+                var targetPost = (post.IsEmptyRepost && post.Repost != null) ? post.Repost : post;
+                Frame.Navigate(typeof(PostDetailsPage), targetPost.Id);
             }
         }
 
@@ -212,7 +232,8 @@ namespace wasteof.phone
                     return;
                 }
 
-                Frame.Navigate(typeof(ComposePage), post.Id);
+                var targetPost = (post.IsEmptyRepost && post.Repost != null) ? post.Repost : post;
+                Frame.Navigate(typeof(ComposePage), targetPost.Id);
             }
         }
 

@@ -25,6 +25,8 @@ namespace wasteof.phone
         private int _readPage = 1;
         private bool _unreadHasMore = true;
         private bool _readHasMore = true;
+        private bool _isUnreadLoading = false;
+        private bool _isReadLoading = false;
 
         public NotificationsPage()
         {
@@ -46,14 +48,12 @@ namespace wasteof.phone
             if (NotificationsPivot.SelectedIndex == 0)
             {
                 _unreadPage = 1;
-                _unreadNotifications.Clear();
                 _unreadHasMore = true;
                 LoadUnreadNotificationsAsync();
             }
             else
             {
                 _readPage = 1;
-                _readNotifications.Clear();
                 _readHasMore = true;
                 LoadReadNotificationsAsync();
             }
@@ -61,12 +61,19 @@ namespace wasteof.phone
 
         private async void LoadUnreadNotificationsAsync()
         {
+            if (_isUnreadLoading) return;
+            _isUnreadLoading = true;
+
             UnreadProgressBar.Visibility = Visibility.Visible;
             LoadMoreUnreadButton.IsEnabled = false;
 
             var list = await ApiService.Instance.GetNotificationsAsync(true, _unreadPage);
             if (list != null)
             {
+                if (_unreadPage == 1)
+                {
+                    _unreadNotifications.Clear();
+                }
                 _unreadNotifications.AddRange(list);
                 UnreadListView.ItemsSource = null;
                 UnreadListView.ItemsSource = _unreadNotifications;
@@ -77,16 +84,24 @@ namespace wasteof.phone
 
             UnreadProgressBar.Visibility = Visibility.Collapsed;
             LoadMoreUnreadButton.IsEnabled = true;
+            _isUnreadLoading = false;
         }
 
         private async void LoadReadNotificationsAsync()
         {
+            if (_isReadLoading) return;
+            _isReadLoading = true;
+
             ReadProgressBar.Visibility = Visibility.Visible;
             LoadMoreReadButton.IsEnabled = false;
 
             var list = await ApiService.Instance.GetNotificationsAsync(false, _readPage);
             if (list != null)
             {
+                if (_readPage == 1)
+                {
+                    _readNotifications.Clear();
+                }
                 _readNotifications.AddRange(list);
                 ReadListView.ItemsSource = null;
                 ReadListView.ItemsSource = _readNotifications;
@@ -97,6 +112,7 @@ namespace wasteof.phone
 
             ReadProgressBar.Visibility = Visibility.Collapsed;
             LoadMoreReadButton.IsEnabled = true;
+            _isReadLoading = false;
         }
 
         private void LoadMoreUnreadButton_Click(object sender, RoutedEventArgs e)

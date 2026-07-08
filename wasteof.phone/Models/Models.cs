@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using Windows.UI.Xaml;
 
 namespace wasteof.phone.Models
 {
@@ -108,7 +109,12 @@ namespace wasteof.phone.Models
         public int LovesCount
         {
             get { return _lovesCount; }
-            set { _lovesCount = value; OnPropertyChanged("LovesCount"); }
+            set 
+            { 
+                _lovesCount = value; 
+                OnPropertyChanged("LovesCount"); 
+                OnPropertyChanged("DisplayLovesCount"); 
+            }
         }
 
         [JsonProperty("reposts")]
@@ -122,7 +128,22 @@ namespace wasteof.phone.Models
         public bool? IsLoving
         {
             get { return _isLoving; }
-            set { _isLoving = value; OnPropertyChanged("IsLoving"); OnPropertyChanged("LoveHeartColor"); OnPropertyChanged("LoveHeartGlyph"); OnPropertyChanged("LoveHeartFill"); OnPropertyChanged("LoveHeartStroke"); }
+            set 
+            { 
+                _isLoving = value; 
+                OnPropertyChanged("IsLoving"); 
+                OnPropertyChanged("LoveHeartColor"); 
+                OnPropertyChanged("LoveHeartGlyph"); 
+                OnPropertyChanged("LoveHeartFill"); 
+                OnPropertyChanged("LoveHeartStroke"); 
+                OnPropertyChanged("DisplayLoveHeartFill"); 
+                OnPropertyChanged("DisplayLoveHeartStroke"); 
+            }
+        }
+
+        public void RaisePropertyChanged(string name)
+        {
+            OnPropertyChanged(name);
         }
 
         // Helper properties for UI
@@ -134,6 +155,88 @@ namespace wasteof.phone.Models
         public string LoveHeartFill => (IsLoving == true) ? "Red" : "Transparent";
         [JsonIgnore]
         public string LoveHeartStroke => (IsLoving == true) ? "Red" : "#888888";
+
+        // Image parsing helpers
+        [JsonIgnore]
+        public string FirstImageUrl
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(Content)) return null;
+                try
+                {
+                    int index = Content.IndexOf("<img");
+                    if (index != -1)
+                    {
+                        int srcIndex = Content.IndexOf("src=", index);
+                        if (srcIndex != -1)
+                        {
+                            char quoteChar = Content[srcIndex + 4];
+                            if (quoteChar == '"' || quoteChar == '\'')
+                            {
+                                int start = srcIndex + 5;
+                                int end = Content.IndexOf(quoteChar, start);
+                                if (end != -1)
+                                {
+                                    return Content.Substring(start, end - start);
+                                }
+                            }
+                        }
+                    }
+                }
+                catch { }
+                return null;
+            }
+        }
+        
+        [JsonIgnore]
+        public Visibility ImageVisibility => !string.IsNullOrEmpty(FirstImageUrl) ? Visibility.Visible : Visibility.Collapsed;
+
+        // Empty Repost UI redirection helpers
+        [JsonIgnore]
+        public bool IsEmptyRepost => Repost != null && string.IsNullOrWhiteSpace(CleanContent);
+
+        [JsonIgnore]
+        public Poster DisplayPoster => IsEmptyRepost ? Repost.Poster : Poster;
+
+        [JsonIgnore]
+        public string DisplayTime => IsEmptyRepost ? Repost.FormattedTime : FormattedTime;
+
+        [JsonIgnore]
+        public string DisplayContent => IsEmptyRepost ? Repost.CleanContent : CleanContent;
+
+        [JsonIgnore]
+        public string DisplayHtml => IsEmptyRepost ? Repost.Content : Content;
+
+        [JsonIgnore]
+        public string DisplayFirstImageUrl => IsEmptyRepost ? Repost.FirstImageUrl : FirstImageUrl;
+
+        [JsonIgnore]
+        public Visibility DisplayImageVisibility => IsEmptyRepost ? Repost.ImageVisibility : ImageVisibility;
+
+        [JsonIgnore]
+        public string RepostHeader => IsEmptyRepost ? $"@{Poster.Name} reposted" : null;
+
+        [JsonIgnore]
+        public Visibility RepostHeaderVisibility => IsEmptyRepost ? Visibility.Visible : Visibility.Collapsed;
+
+        [JsonIgnore]
+        public Visibility NormalRepostBorderVisibility => (Repost != null && !IsEmptyRepost) ? Visibility.Visible : Visibility.Collapsed;
+
+        [JsonIgnore]
+        public int DisplayLovesCount => IsEmptyRepost ? Repost.LovesCount : LovesCount;
+
+        [JsonIgnore]
+        public int DisplayCommentsCount => IsEmptyRepost ? Repost.CommentsCount : CommentsCount;
+
+        [JsonIgnore]
+        public int DisplayRepostsCount => IsEmptyRepost ? Repost.RepostsCount : RepostsCount;
+
+        [JsonIgnore]
+        public string DisplayLoveHeartFill => IsEmptyRepost ? Repost.LoveHeartFill : LoveHeartFill;
+
+        [JsonIgnore]
+        public string DisplayLoveHeartStroke => IsEmptyRepost ? Repost.LoveHeartStroke : LoveHeartStroke;
         [JsonIgnore]
         public string FormattedTime
         {

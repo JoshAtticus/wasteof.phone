@@ -19,6 +19,7 @@ namespace wasteof.phone
         private Post _post;
         private System.Collections.ObjectModel.ObservableCollection<Comment> _comments = new System.Collections.ObjectModel.ObservableCollection<Comment>();
         private string _replyParentId = null;
+        private bool _isLoveStatusLoaded = false;
 
         public PostDetailsPage()
         {
@@ -29,6 +30,12 @@ namespace wasteof.phone
         {
             var postId = e.Parameter as string;
             var post = e.Parameter as Post;
+
+            if (post != null && post.IsEmptyRepost && post.Repost != null)
+            {
+                post = post.Repost;
+            }
+
             if (postId != null)
             {
                 _postId = postId;
@@ -38,18 +45,21 @@ namespace wasteof.phone
             {
                 _post = post;
                 _postId = post.Id;
+                _isLoveStatusLoaded = false;
                 DisplayPost();
-                if (ApiService.Instance.IsLoggedIn && _post.IsLoving == null)
+                if (ApiService.Instance.IsLoggedIn)
                 {
                     _post.IsLoving = await ApiService.Instance.GetPostLoveStatusAsync(_postId, ApiService.Instance.CurrentUsername);
-                    UpdateLoveButtonState();
                 }
+                _isLoveStatusLoaded = true;
+                UpdateLoveButtonState();
                 await LoadCommentsAsync();
             }
         }
 
         private async System.Threading.Tasks.Task RefreshPostAndCommentsAsync()
         {
+            _isLoveStatusLoaded = false;
             _post = await ApiService.Instance.GetPostDetailsAsync(_postId);
             if (_post == null)
             {
@@ -59,12 +69,20 @@ namespace wasteof.phone
                 return;
             }
 
+            if (_post.IsEmptyRepost && _post.Repost != null)
+            {
+                _post = _post.Repost;
+                _postId = _post.Id;
+            }
+
+            DisplayPost();
+
             if (ApiService.Instance.IsLoggedIn)
             {
                 _post.IsLoving = await ApiService.Instance.GetPostLoveStatusAsync(_postId, ApiService.Instance.CurrentUsername);
             }
-
-            DisplayPost();
+            _isLoveStatusLoaded = true;
+            UpdateLoveButtonState();
             await LoadCommentsAsync();
         }
 
@@ -79,12 +97,22 @@ namespace wasteof.phone
 
             PosterNameTextBlock.Text = _post.Poster.Name;
             PostTimeTextBlock.Text = _post.FormattedTime;
-            PostContentTextBlock.Text = _post.CleanContent;
+            Helpers.HtmlHelper.SetHtml(PostContentTextBlock, _post.Content);
+
+            if (!string.IsNullOrEmpty(_post.FirstImageUrl))
+            {
+                PostImage.Source = new BitmapImage(new Uri(_post.FirstImageUrl));
+                PostImage.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                PostImage.Visibility = Visibility.Collapsed;
+            }
 
             if (_post.Repost != null)
             {
                 RepostPosterName.Text = _post.Repost.Poster.Name;
-                RepostContent.Text = _post.Repost.CleanContent;
+                Helpers.HtmlHelper.SetHtml(RepostContent, _post.Repost.Content);
                 RepostBorder.Visibility = Visibility.Visible;
             }
             else
@@ -108,7 +136,7 @@ namespace wasteof.phone
         private void UpdateLoveButtonState()
         {
             if (_post == null) return;
-            bool isLoving = _post.IsLoving ?? false;
+            bool isLoving = _isLoveStatusLoaded ? (_post.IsLoving ?? false) : false;
             LoveIcon.Fill = new SolidColorBrush(isLoving ? Windows.UI.Colors.Red : Windows.UI.Colors.Transparent);
             LoveIcon.Stroke = new SolidColorBrush(isLoving ? Windows.UI.Colors.Red : Windows.UI.Color.FromArgb(255, 136, 136, 136));
             LoveCountTextBlock.Text = _post.LovesCount.ToString();
