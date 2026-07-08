@@ -28,22 +28,18 @@ namespace wasteof.phone
         {
             this.InitializeComponent();
             
-            // Re-authenticate / ensure session state is loaded
             if (!ApiService.Instance.IsLoggedIn)
             {
-                // Defer navigation to ensure frame is ready
                 this.Loaded += (s, e) => Frame.Navigate(typeof(LoginPage));
             }
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            // Clear backstack so user can't navigate back to login screen
             Frame.BackStack.Clear();
 
             if (ApiService.Instance.IsLoggedIn)
             {
-                // Trigger initial load for Feed tab
                 RefreshActiveTab();
             }
         }
@@ -144,7 +140,6 @@ namespace wasteof.phone
         {
             AccountProgressBar.Visibility = Visibility.Visible;
             
-            // Load user profile stats
             var user = await ApiService.Instance.GetUserProfileAsync(ApiService.Instance.CurrentUsername);
             if (user != null)
             {
@@ -161,7 +156,6 @@ namespace wasteof.phone
                 }
             }
 
-            // Load user's own posts
             LoadMoreMyPostsButton.IsEnabled = false;
             var feed = await ApiService.Instance.GetUserPostsAsync(ApiService.Instance.CurrentUsername, _myPostsPage);
             AccountProgressBar.Visibility = Visibility.Collapsed;

@@ -14,13 +14,11 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- TitlePanel -->
         <StackPanel Grid.Row="0" Margin="19,19,0,28">
             <TextBlock Text="WASTEOF.PHONE" Style="{ThemeResource TitleTextBlockStyle}" Typography.Capitals="AllSmallCaps"/>
             <TextBlock Text="sign in" Margin="0,-6.5,0,0" Style="{ThemeResource HeaderTextBlockStyle}"/>
         </StackPanel>
 
-        <!-- ContentPanel -->
         <Grid Grid.Row="1" x:Name="ContentPanel" Margin="19,0,19,0">
             <StackPanel VerticalAlignment="Top">
                 <TextBlock Text="username" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,8" />

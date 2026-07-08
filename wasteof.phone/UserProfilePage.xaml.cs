@@ -50,7 +50,6 @@ namespace wasteof.phone
                 return;
             }
 
-            // Update Header fields
             ProfilePictureImage.Source = new BitmapImage(new Uri(_user.ProfilePictureUrl));
             BannerImage.Source = new BitmapImage(new Uri(_user.BannerUrl));
             DisplayNameTextBlock.Text = _user.Name;
@@ -64,7 +63,6 @@ namespace wasteof.phone
                 FollowingCountTextBlock.Text = _user.Stats.Following.ToString();
             }
 
-            // Determine if Follow Button should be shown
             if (ApiService.Instance.IsLoggedIn)
             {
                 if (_username.Equals(ApiService.Instance.CurrentUsername, StringComparison.OrdinalIgnoreCase))
@@ -74,7 +72,6 @@ namespace wasteof.phone
                 else
                 {
                     FollowButton.Visibility = Visibility.Visible;
-                    // Fetch follow status
                     _isFollowing = await ApiService.Instance.GetFollowStatusAsync(_username, ApiService.Instance.CurrentUsername);
                     UpdateFollowButtonText();
                 }
@@ -85,7 +82,6 @@ namespace wasteof.phone
                 FollowButton.Content = "follow";
             }
 
-            // Load user posts
             await LoadUserPostsAsync();
         }
 
@@ -142,7 +138,6 @@ namespace wasteof.phone
                 _isFollowing = response.NewState.IsFollowing;
                 UpdateFollowButtonText();
                 
-                // Update followers stat dynamically
                 FollowersCountTextBlock.Text = response.NewState.Followers.ToString();
             }
             FollowButton.IsEnabled = true;

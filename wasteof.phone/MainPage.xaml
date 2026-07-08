@@ -12,7 +12,6 @@
     <Grid x:Name="LayoutRoot">
         <Pivot x:Name="MainPivot" SelectionChanged="MainPivot_SelectionChanged">
             
-            <!-- FEED TAB -->
             <PivotItem Header="feed">
                 <Grid>
                     <ProgressBar x:Name="FeedProgressBar" VerticalAlignment="Top" IsIndeterminate="True" Visibility="Collapsed"/>
@@ -25,7 +24,6 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <!-- Profile Picture -->
                                     <Border Width="40" Height="40" VerticalAlignment="Top" Margin="0,0,12,0" Background="{ThemeResource PhoneBorderBrush}" Tapped="Username_Tapped">
                                         <Image Source="{Binding Poster.ProfilePictureUrl}" Width="40" Height="40" Stretch="UniformToFill"/>
                                     </Border>
@@ -36,14 +34,12 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
-                                            <!-- Clickable username -->
                                             <TextBlock Text="{Binding Poster.Name}" FontWeight="Bold" Style="{ThemeResource BodyTextBlockStyle}" Foreground="{StaticResource PhoneAccentBrush}" Tapped="Username_Tapped"/>
                                             <TextBlock Grid.Column="1" Text="{Binding FormattedTime}" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{StaticResource PhoneMutedBrush}"/>
                                         </Grid>
                                         
                                         <TextBlock Text="{Binding CleanContent}" TextWrapping="Wrap" MaxLines="3" TextTrimming="WordEllipsis" Style="{ThemeResource BodyTextBlockStyle}"/>
                                         
-                                        <!-- Repost indicator -->
                                         <Border BorderBrush="{StaticResource PhoneAccentBrush}" BorderThickness="2,0,0,0" Padding="6,0,0,0" Margin="0,4,0,4" Visibility="{Binding Repost, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}">
                                             <StackPanel>
                                                 <TextBlock Text="{Binding Repost.Poster.Name}" FontWeight="SemiBold" Style="{ThemeResource CaptionTextBlockStyle}"/>
@@ -51,9 +47,7 @@
                                             </StackPanel>
                                         </Border>
 
-                                        <!-- Stat Buttons Row -->
                                         <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                            <!-- Love Button -->
                                             <Button Click="LoveButton_Click" Width="80" Margin="0,0,12,0" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
                                                 <StackPanel Orientation="Horizontal">
                                                     <Path Data="M 12,5 C 10,3 6,3 4,5 C 2,7 2,11 4,13 L 12,21 L 20,13 C 22,11 22,7 20,5 C 18,3 14,3 12,5 Z" Stroke="{Binding LoveHeartStroke}" StrokeThickness="2" Fill="{Binding LoveHeartFill}" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
@@ -61,7 +55,6 @@
                                                 </StackPanel>
                                             </Button>
 
-                                            <!-- Comment Button -->
                                             <Button Click="CommentButton_Click" Width="80" Margin="0,0,12,0" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
                                                 <StackPanel Orientation="Horizontal">
                                                     <Path Data="M 2,4 L 22,4 L 22,16 L 8,16 L 3,21 L 3,16 L 2,16 Z" Stroke="{ThemeResource PhoneMutedBrush}" StrokeThickness="2" Fill="Transparent" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
@@ -69,7 +62,6 @@
                                                 </StackPanel>
                                             </Button>
 
-                                            <!-- Repost Button -->
                                             <Button Click="RepostButton_Click" Width="80" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
                                                 <StackPanel Orientation="Horizontal">
                                                     <Path Data="M 4,12 L 4,7 C 4,5 5,4 7,4 L 17,4 M 13,1 L 18,4 L 13,7 M 16,8 L 16,13 C 16,15 15,16 13,16 L 3,16 M 7,13 L 2,16 L 7,19" Stroke="{ThemeResource PhoneMutedBrush}" StrokeThickness="2" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0">
@@ -92,7 +84,6 @@
                 </Grid>
             </PivotItem>
 
-            <!-- EXPLORE TAB -->
             <PivotItem Header="explore">
                 <Grid>
                     <ProgressBar x:Name="ExploreProgressBar" VerticalAlignment="Top" IsIndeterminate="True" Visibility="Collapsed"/>
@@ -105,7 +96,6 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <!-- Profile Picture -->
                                     <Border Width="40" Height="40" VerticalAlignment="Top" Margin="0,0,12,0" Background="{ThemeResource PhoneBorderBrush}" Tapped="Username_Tapped">
                                         <Image Source="{Binding Poster.ProfilePictureUrl}" Width="40" Height="40" Stretch="UniformToFill"/>
                                     </Border>
@@ -122,9 +112,7 @@
                                         
                                         <TextBlock Text="{Binding CleanContent}" TextWrapping="Wrap" MaxLines="3" TextTrimming="WordEllipsis" Style="{ThemeResource BodyTextBlockStyle}"/>
                                         
-                                        <!-- Stat Buttons Row -->
                                         <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                            <!-- Love Button -->
                                             <Button Click="LoveButton_Click" Width="80" Margin="0,0,12,0" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
                                                 <StackPanel Orientation="Horizontal">
                                                     <Path Data="M 12,5 C 10,3 6,3 4,5 C 2,7 2,11 4,13 L 12,21 L 20,13 C 22,11 22,7 20,5 C 18,3 14,3 12,5 Z" Stroke="{Binding LoveHeartStroke}" StrokeThickness="2" Fill="{Binding LoveHeartFill}" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
@@ -132,7 +120,6 @@
                                                 </StackPanel>
                                             </Button>
 
-                                            <!-- Comment Button -->
                                             <Button Click="CommentButton_Click" Width="80" Margin="0,0,12,0" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
                                                 <StackPanel Orientation="Horizontal">
                                                     <Path Data="M 2,4 L 22,4 L 22,16 L 8,16 L 3,21 L 3,16 L 2,16 Z" Stroke="{ThemeResource PhoneMutedBrush}" StrokeThickness="2" Fill="Transparent" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
@@ -140,7 +127,6 @@
                                                 </StackPanel>
                                             </Button>
 
-                                            <!-- Repost Button -->
                                             <Button Click="RepostButton_Click" Width="80" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
                                                 <StackPanel Orientation="Horizontal">
                                                     <Path Data="M 4,12 L 4,7 C 4,5 5,4 7,4 L 17,4 M 13,1 L 18,4 L 13,7 M 16,8 L 16,13 C 16,15 15,16 13,16 L 3,16 M 7,13 L 2,16 L 7,19" Stroke="{ThemeResource PhoneMutedBrush}" StrokeThickness="2" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0">
@@ -163,16 +149,13 @@
                 </Grid>
             </PivotItem>
 
-            <!-- ACCOUNT TAB -->
             <PivotItem Header="account">
                 <Grid>
                     <ProgressBar x:Name="AccountProgressBar" VerticalAlignment="Top" IsIndeterminate="True" Visibility="Collapsed"/>
                     <ListView x:Name="MyPostsListView" IsItemClickEnabled="True" ItemClick="PostListView_ItemClick" HorizontalContentAlignment="Stretch">
                         <ListView.Header>
-                            <!-- Personal Profile Info -->
                             <Border Margin="19,8,19,16" BorderBrush="{ThemeResource PhoneBorderBrush}" BorderThickness="0,0,0,1" Padding="0,0,0,16">
                                 <StackPanel>
-                                    <!-- Banner Image -->
                                     <Grid Height="120" Margin="0,0,0,12" Background="{ThemeResource PhoneBorderBrush}">
                                         <Image x:Name="AccountBannerImage" Stretch="UniformToFill" Height="120"/>
                                     </Grid>
@@ -183,7 +166,6 @@
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <!-- Profile Picture -->
                                         <Border Width="64" Height="64" VerticalAlignment="Center" Margin="0,0,12,0" Background="{ThemeResource PhoneBorderBrush}">
                                             <Image x:Name="AccountProfilePictureImage" Width="64" Height="64" Stretch="UniformToFill"/>
                                         </Border>
@@ -194,7 +176,6 @@
                                         </StackPanel>
                                     </Grid>
 
-                                    <!-- Stats Row -->
                                     <Grid Margin="0,8,0,8">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
@@ -226,7 +207,6 @@
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <!-- Profile Picture -->
                                     <Border Width="40" Height="40" VerticalAlignment="Top" Margin="0,0,12,0" Background="{ThemeResource PhoneBorderBrush}">
                                         <Image Source="{Binding Poster.ProfilePictureUrl}" Width="40" Height="40" Stretch="UniformToFill"/>
                                     </Border>
@@ -242,9 +222,7 @@
                                         </Grid>
                                         <TextBlock Text="{Binding CleanContent}" TextWrapping="Wrap" MaxLines="3" TextTrimming="WordEllipsis" Style="{ThemeResource BodyTextBlockStyle}"/>
                                         
-                                        <!-- Stat Buttons Row -->
                                         <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                            <!-- Love Button -->
                                             <Button Click="LoveButton_Click" Width="80" Margin="0,0,12,0" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
                                                 <StackPanel Orientation="Horizontal">
                                                     <Path Data="M 12,5 C 10,3 6,3 4,5 C 2,7 2,11 4,13 L 12,21 L 20,13 C 22,11 22,7 20,5 C 18,3 14,3 12,5 Z" Stroke="{Binding LoveHeartStroke}" StrokeThickness="2" Fill="{Binding LoveHeartFill}" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
@@ -252,7 +230,6 @@
                                                 </StackPanel>
                                             </Button>
 
-                                            <!-- Comment Button -->
                                             <Button Click="CommentButton_Click" Width="80" Margin="0,0,12,0" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
                                                 <StackPanel Orientation="Horizontal">
                                                     <Path Data="M 2,4 L 22,4 L 22,16 L 8,16 L 3,21 L 3,16 L 2,16 Z" Stroke="{ThemeResource PhoneMutedBrush}" StrokeThickness="2" Fill="Transparent" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
@@ -260,7 +237,6 @@
                                                 </StackPanel>
                                             </Button>
 
-                                            <!-- Repost Button -->
                                             <Button Click="RepostButton_Click" Width="80" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
                                                 <StackPanel Orientation="Horizontal">
                                                     <Path Data="M 4,12 L 4,7 C 4,5 5,4 7,4 L 17,4 M 13,1 L 18,4 L 13,7 M 16,8 L 16,13 C 16,15 15,16 13,16 L 3,16 M 7,13 L 2,16 L 7,19" Stroke="{ThemeResource PhoneMutedBrush}" StrokeThickness="2" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0">

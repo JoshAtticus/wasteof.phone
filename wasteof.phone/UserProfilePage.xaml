@@ -15,20 +15,16 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- TitlePanel -->
         <StackPanel Grid.Row="0" Margin="19,19,0,12">
             <TextBlock Text="WASTEOF.PHONE" Style="{ThemeResource TitleTextBlockStyle}" Typography.Capitals="AllSmallCaps"/>
             <TextBlock x:Name="UsernameHeaderTextBlock" Text="profile" Margin="0,-6.5,0,0" Style="{ThemeResource HeaderTextBlockStyle}"/>
         </StackPanel>
 
-        <!-- ContentPanel -->
         <ListView x:Name="UserPostsListView" Grid.Row="1" Margin="19,0,19,0" IsItemClickEnabled="True" ItemClick="UserPostsListView_ItemClick" HorizontalContentAlignment="Stretch">
             <ListView.Header>
                 <StackPanel Margin="0,19,0,16">
-                    <!-- Profile Header Details -->
                     <Border Margin="0,0,0,16" BorderBrush="{ThemeResource PhoneBorderBrush}" BorderThickness="0,0,0,1" Padding="0,0,0,16">
                         <StackPanel>
-                            <!-- Banner Image -->
                             <Grid Height="120" Margin="0,0,0,12" Background="{ThemeResource PhoneBorderBrush}">
                                 <Image x:Name="BannerImage" Stretch="UniformToFill" Height="120"/>
                             </Grid>
@@ -40,13 +36,11 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
-                                <!-- Profile Picture (Square) -->
                                 <Border Width="64" Height="64" VerticalAlignment="Center" Margin="0,0,12,0" Background="{ThemeResource PhoneBorderBrush}">
                                     <Image x:Name="ProfilePictureImage" Width="64" Height="64" Stretch="UniformToFill"/>
                                 </Border>
 
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                    <!-- Online indicator -->
                                     <TextBlock x:Name="OnlineStatusTextBlock" Text="offline" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource PhoneMutedBrush}"/>
                                     <TextBlock x:Name="DisplayNameTextBlock" Text="Display Name" FontWeight="Bold" Style="{ThemeResource SubheaderTextBlockStyle}"/>
                                 </StackPanel>
@@ -56,7 +50,6 @@
 
                             <TextBlock x:Name="BioTextBlock" Text="User bio here..." TextWrapping="Wrap" Margin="0,0,0,16" Style="{ThemeResource BodyTextBlockStyle}"/>
 
-                            <!-- Stats Row -->
                             <Grid Margin="0,0,0,16">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -95,9 +88,7 @@
                         </Grid>
                         <TextBlock Text="{Binding CleanContent}" TextWrapping="Wrap" MaxLines="3" TextTrimming="WordEllipsis" Style="{ThemeResource BodyTextBlockStyle}"/>
                         
-                        <!-- Stat Buttons Row -->
                         <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                            <!-- Love Button -->
                             <Button Click="LoveButton_Click" Width="80" Margin="0,0,12,0" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
                                 <StackPanel Orientation="Horizontal">
                                     <Path Data="M 12,5 C 10,3 6,3 4,5 C 2,7 2,11 4,13 L 12,21 L 20,13 C 22,11 22,7 20,5 C 18,3 14,3 12,5 Z" Stroke="{Binding LoveHeartStroke}" StrokeThickness="2" Fill="{Binding LoveHeartFill}" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
@@ -105,7 +96,6 @@
                                 </StackPanel>
                             </Button>
 
-                            <!-- Comment Button -->
                             <Button Click="CommentButton_Click" Width="80" Margin="0,0,12,0" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
                                 <StackPanel Orientation="Horizontal">
                                     <Path Data="M 2,4 L 22,4 L 22,16 L 8,16 L 3,21 L 3,16 L 2,16 Z" Stroke="{ThemeResource PhoneMutedBrush}" StrokeThickness="2" Fill="Transparent" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
@@ -113,7 +103,6 @@
                                 </StackPanel>
                             </Button>
 
-                            <!-- Repost Button -->
                             <Button Click="RepostButton_Click" Width="80" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
                                 <StackPanel Orientation="Horizontal">
                                     <Path Data="M 4,12 L 4,7 C 4,5 5,4 7,4 L 17,4 M 13,1 L 18,4 L 13,7 M 16,8 L 16,13 C 16,15 15,16 13,16 L 3,16 M 7,13 L 2,16 L 7,19" Stroke="{ThemeResource PhoneMutedBrush}" StrokeThickness="2" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0">

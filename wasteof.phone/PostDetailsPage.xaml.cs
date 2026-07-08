@@ -81,7 +81,6 @@ namespace wasteof.phone
             PostTimeTextBlock.Text = _post.FormattedTime;
             PostContentTextBlock.Text = _post.CleanContent;
 
-            // Display Repost if available
             if (_post.Repost != null)
             {
                 RepostPosterName.Text = _post.Repost.Poster.Name;
@@ -93,10 +92,8 @@ namespace wasteof.phone
                 RepostBorder.Visibility = Visibility.Collapsed;
             }
 
-            // Style love button
             UpdateLoveButtonState();
 
-            // Show delete button if current user is owner
             if (ApiService.Instance.IsLoggedIn && 
                 _post.Poster.Name.Equals(ApiService.Instance.CurrentUsername, StringComparison.OrdinalIgnoreCase))
             {
@@ -131,7 +128,6 @@ namespace wasteof.phone
                     comment.Level = 0;
                     _comments.Add(comment);
 
-                    // Fetch replies dynamically in the background
                     var task = FetchAndAppendRepliesBackgroundAsync(comment, 1);
                 }
             }
@@ -158,7 +154,6 @@ namespace wasteof.phone
                                 {
                                     reply.Level = level;
 
-                                    // Find parent index dynamically in case elements shifted
                                     int parentIndex = _comments.IndexOf(parentComment);
                                     if (parentIndex >= 0)
                                     {
@@ -168,7 +163,6 @@ namespace wasteof.phone
                                         insertOffset++;
                                     }
 
-                                    // Recursively fetch replies for this nested comment reply
                                     var task = FetchAndAppendRepliesBackgroundAsync(reply, level + 1);
                                 }
                             });

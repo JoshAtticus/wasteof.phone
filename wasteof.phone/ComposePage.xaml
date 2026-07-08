@@ -14,12 +14,10 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- TitlePanel -->
         <StackPanel Grid.Row="0" Margin="19,19,0,12">
             <TextBlock x:Name="PageHeaderTitle" Text="compose" Margin="0,-6.5,0,0" Style="{ThemeResource HeaderTextBlockStyle}"/>
         </StackPanel>
 
-        <!-- ContentPanel -->
         <Grid Grid.Row="1" x:Name="ContentPanel" Margin="19,0,19,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>

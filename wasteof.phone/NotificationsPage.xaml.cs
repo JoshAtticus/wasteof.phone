@@ -71,7 +71,7 @@ namespace wasteof.phone
                 UnreadListView.ItemsSource = null;
                 UnreadListView.ItemsSource = _unreadNotifications;
 
-                _unreadHasMore = list.Count >= 20; // Default page size is 20
+                _unreadHasMore = list.Count >= 20;
                 LoadMoreUnreadButton.Visibility = _unreadHasMore ? Visibility.Visible : Visibility.Collapsed;
             }
 
@@ -122,13 +122,11 @@ namespace wasteof.phone
             var notif = e.ClickedItem as Notification;
             if (notif == null || notif.Data == null) return;
 
-            // Mark as read in the background if it's unread
             if (!notif.Read)
             {
                 await ApiService.Instance.MarkNotificationsReadAsync(new List<string> { notif.Id });
             }
 
-            // Navigate based on type
             if (notif.Data.Post != null)
             {
                 Frame.Navigate(typeof(PostDetailsPage), notif.Data.Post.Id);

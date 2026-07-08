@@ -14,9 +14,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Pivot Control -->
         <Pivot x:Name="NotificationsPivot" Grid.Row="1" Title="notifications" SelectionChanged="NotificationsPivot_SelectionChanged">
-            <!-- UNREAD TAB -->
             <PivotItem Header="unread">
                 <Grid>
                     <ProgressBar x:Name="UnreadProgressBar" VerticalAlignment="Top" IsIndeterminate="True" Visibility="Collapsed"/>
@@ -35,7 +33,6 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <!-- Actor Profile Picture -->
                                     <Border Width="40" Height="40" VerticalAlignment="Top" Margin="0,0,12,0" Background="{ThemeResource PhoneBorderBrush}" Tapped="Username_Tapped">
                                         <Image Source="{Binding Data.Actor.ProfilePictureUrl}" Width="40" Height="40" Stretch="UniformToFill"/>
                                     </Border>
@@ -56,7 +53,6 @@
                 </Grid>
             </PivotItem>
 
-            <!-- READ TAB -->
             <PivotItem Header="read">
                 <Grid>
                     <ProgressBar x:Name="ReadProgressBar" VerticalAlignment="Top" IsIndeterminate="True" Visibility="Collapsed"/>
@@ -75,7 +71,6 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <!-- Actor Profile Picture -->
                                     <Border Width="40" Height="40" VerticalAlignment="Top" Margin="0,0,12,0" Background="{ThemeResource PhoneBorderBrush}" Tapped="Username_Tapped">
                                         <Image Source="{Binding Data.Actor.ProfilePictureUrl}" Width="40" Height="40" Stretch="UniformToFill"/>
                                     </Border>

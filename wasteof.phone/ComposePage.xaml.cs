@@ -22,7 +22,6 @@ namespace wasteof.phone
             var targetId = e.Parameter as string;
             if (targetId != null)
             {
-                // We are reposting a post
                 _repostId = targetId;
                 PageHeaderTitle.Text = "repost";
                 RepostIndicator.Text = $"reposting: {targetId}";
@@ -49,7 +48,6 @@ namespace wasteof.phone
         {
             string content = PostContentTextBox.Text.Trim();
 
-            // If it's a new post, content must not be empty. If it's a repost, content is optional.
             if (string.IsNullOrEmpty(content) && string.IsNullOrEmpty(_repostId))
             {
                 var dialog = new MessageDialog("Post content cannot be empty.");
@@ -64,9 +62,6 @@ namespace wasteof.phone
             Post createdPost = null;
             if (!string.IsNullOrEmpty(_repostId))
             {
-                // In wasteof, reposting can have optional content
-                // If content is empty, we just call the repost endpoint directly, or call createPost with a repostId.
-                // Let's call CreatePostAsync with both content and repostId.
                 createdPost = await ApiService.Instance.CreatePostAsync(content, _repostId);
             }
             else
@@ -76,7 +71,6 @@ namespace wasteof.phone
 
             if (createdPost != null)
             {
-                // Success, navigate back
                 if (Frame.CanGoBack)
                 {
                     Frame.GoBack();

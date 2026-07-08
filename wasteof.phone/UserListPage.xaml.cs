@@ -20,7 +20,7 @@ namespace wasteof.phone
     public sealed partial class UserListPage : Page
     {
         private string _username;
-        private string _listType; // "followers" or "following"
+        private string _listType;
 
         public UserListPage()
         {

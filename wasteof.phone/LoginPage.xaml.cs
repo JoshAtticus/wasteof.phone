@@ -16,10 +16,8 @@ namespace wasteof.phone
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            // Clear backstack so user can't press back to exit after logging out
             Frame.BackStack.Clear();
             
-            // Check if already logged in (auto-login check is also in App.xaml.cs, but safety check here)
             if (ApiService.Instance.IsLoggedIn)
             {
                 Frame.Navigate(typeof(MainPage));
@@ -37,7 +35,6 @@ namespace wasteof.phone
                 return;
             }
 
-            // Set UI state to Loading
             LoginButton.IsEnabled = false;
             UsernameTextBox.IsEnabled = false;
             PasswordBox.IsEnabled = false;
@@ -46,7 +43,6 @@ namespace wasteof.phone
 
             bool success = await ApiService.Instance.LoginAsync(username, password);
 
-            // Restore UI state
             LoginProgress.IsActive = false;
             LoginButton.IsEnabled = true;
             UsernameTextBox.IsEnabled = true;
