@@ -23,6 +23,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <TextBlock x:Name="RepostIndicator" Text="reposting..." Foreground="{ThemeResource PhoneAccentBrush}" Margin="0,0,0,8" Visibility="Collapsed" Style="{ThemeResource BodyTextBlockStyle}"/>
@@ -36,7 +37,11 @@
                      HorizontalAlignment="Stretch"
                      TextChanged="PostContentTextBox_TextChanged"/>
 
-            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,12">
+            <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,8,0,8" Height="100" HorizontalAlignment="Stretch">
+                <StackPanel x:Name="ImagesPreviewStackPanel" Orientation="Horizontal"/>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,12">
                 <TextBlock x:Name="CharCountTextBlock" Text="0 / 5000" Style="{ThemeResource BodyTextBlockStyle}" Foreground="{ThemeResource PhoneMutedBrush}"/>
             </StackPanel>
         </Grid>
@@ -45,6 +50,7 @@
     <Page.BottomAppBar>
         <CommandBar>
             <AppBarButton x:Name="PostAppBarButton" Icon="Accept" Label="post" Click="PostAppBarButton_Click"/>
+            <AppBarButton x:Name="AddImageAppBarButton" Icon="Camera" Label="add image" Click="AddImageAppBarButton_Click"/>
             <AppBarButton x:Name="CancelAppBarButton" Icon="Cancel" Label="cancel" Click="CancelAppBarButton_Click"/>
         </CommandBar>
     </Page.BottomAppBar>

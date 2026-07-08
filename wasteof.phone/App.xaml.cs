@@ -136,6 +136,25 @@ namespace wasteof.phone
             deferral.Complete();
         }
 
+        protected override void OnActivated(IActivatedEventArgs args)
+        {
+            base.OnActivated(args);
+
+            var continuationEventArgs = args as IContinuationActivatedEventArgs;
+            if (continuationEventArgs != null)
+            {
+                Frame rootFrame = Window.Current.Content as Frame;
+                if (rootFrame != null)
+                {
+                    var composePage = rootFrame.Content as ComposePage;
+                    if (composePage != null)
+                    {
+                        composePage.ContinueFileOpenPicker(continuationEventArgs as FileOpenPickerContinuationEventArgs);
+                    }
+                }
+            }
+        }
+
         private void OnBackPressed(object sender, Windows.Phone.UI.Input.BackPressedEventArgs e)
         {
             Frame rootFrame = Window.Current.Content as Frame;
