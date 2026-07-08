@@ -15,3 +15,8 @@ wasteof.phone is **not compatible with Windows Phone 8.0**, and is not signed, s
 <img width="30%" alt="wp_ss_20260708_0008" src="https://github.com/user-attachments/assets/77258c5e-86d4-44ff-97bd-31e0fdde63cf" />
 <img width="30%" alt="wp_ss_20260708_0009" src="https://github.com/user-attachments/assets/de02512e-be9f-4895-84a4-e7b204a76ece" />
 <img width="30%" alt="wp_ss_20260708_0010" src="https://github.com/user-attachments/assets/bc790d8a-3b3f-43b2-bc5d-8d4d8c176225" />
+
+## Building from Source
+You'll need Visual Studio 2015 installed with the Windows Phone 8.0 and 8.1 SDKs
+
+Import the solution, right click it in solution explorer, restore nuget packages, then build
