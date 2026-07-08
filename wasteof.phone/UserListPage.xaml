@@ -15,7 +15,6 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Margin="19,19,0,0">
-            <TextBlock Text="WASTEOF.PHONE" Style="{ThemeResource TitleTextBlockStyle}" Typography.Capitals="SmallCaps"/>
             <TextBlock x:Name="PageHeaderTitle" Text="users" Margin="0,-6,0,0" Style="{ThemeResource HeaderTextBlockStyle}"/>
         </StackPanel>
 

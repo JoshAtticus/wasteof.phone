@@ -25,6 +25,21 @@ namespace wasteof.phone.Helpers
             obj.SetValue(HtmlProperty, value);
         }
 
+        // Custom attached property to store URLs on Hyperlink objects (since they lack Tag property)
+        public static readonly DependencyProperty UrlProperty =
+            DependencyProperty.RegisterAttached("Url", typeof(string), typeof(HtmlHelper),
+                new PropertyMetadata(null));
+
+        public static string GetUrl(DependencyObject obj)
+        {
+            return (string)obj.GetValue(UrlProperty);
+        }
+
+        public static void SetUrl(DependencyObject obj, string value)
+        {
+            obj.SetValue(UrlProperty, value);
+        }
+
         private static void OnHtmlChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var richText = d as RichTextBlock;
@@ -316,17 +331,8 @@ namespace wasteof.phone.Helpers
                 targetInline = ApplyStyles(targetInline, isBold, isItalic, isUnderline);
                 
                 var hl = new Hyperlink();
-                try
-                {
-                    string url = hyperlinkUrl.Trim();
-                    if (!url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) && 
-                        !url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-                    {
-                        url = "https://" + url;
-                    }
-                    hl.NavigateUri = new Uri(url);
-                }
-                catch { }
+                HtmlHelper.SetUrl(hl, hyperlinkUrl);
+                hl.Click += Hyperlink_Click;
                 hl.Inlines.Add(targetInline);
                 paragraph.Inlines.Add(hl);
             }
@@ -342,17 +348,8 @@ namespace wasteof.phone.Helpers
                         Inline styledRun = ApplyStyles(run, isBold, isItalic, isUnderline);
 
                         var hl = new Hyperlink();
-                        try
-                        {
-                            string url = token.Trim();
-                            if (!url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) && 
-                                !url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-                            {
-                                url = "https://" + url;
-                            }
-                            hl.NavigateUri = new Uri(url);
-                        }
-                        catch { }
+                        HtmlHelper.SetUrl(hl, token);
+                        hl.Click += Hyperlink_Click;
                         hl.Inlines.Add(styledRun);
                         paragraph.Inlines.Add(hl);
                     }
@@ -431,6 +428,65 @@ namespace wasteof.phone.Helpers
                 list.Add(text.Substring(lastIndex, len - lastIndex));
             }
             return list;
+        }
+
+        private static async void Hyperlink_Click(Hyperlink sender, HyperlinkClickEventArgs args)
+        {
+            var url = HtmlHelper.GetUrl(sender);
+            if (string.IsNullOrEmpty(url)) return;
+
+            string cleaned = url.ToLower().Trim();
+            if (cleaned.StartsWith("https://")) cleaned = cleaned.Substring(8);
+            else if (cleaned.StartsWith("http://")) cleaned = cleaned.Substring(7);
+
+            if (cleaned.StartsWith("alpha.")) cleaned = cleaned.Substring(6);
+            else if (cleaned.StartsWith("beta.")) cleaned = cleaned.Substring(5);
+
+            if (cleaned.StartsWith("wasteof.money/"))
+            {
+                string path = cleaned.Substring(14);
+                if (path.StartsWith("posts/"))
+                {
+                    string postId = path.Substring(6);
+                    int queryIdx = postId.IndexOf('?');
+                    if (queryIdx != -1) postId = postId.Substring(0, queryIdx);
+                    postId = postId.Trim('/');
+                    
+                    var frame = Window.Current.Content as Frame;
+                    if (frame != null)
+                    {
+                        frame.Navigate(typeof(PostDetailsPage), postId);
+                        return;
+                    }
+                }
+                else if (path.StartsWith("users/"))
+                {
+                    string username = path.Substring(6);
+                    int queryIdx = username.IndexOf('?');
+                    if (queryIdx != -1) username = username.Substring(0, queryIdx);
+                    username = username.Trim('/');
+
+                    var frame = Window.Current.Content as Frame;
+                    if (frame != null)
+                    {
+                        frame.Navigate(typeof(UserProfilePage), username);
+                        return;
+                    }
+                }
+            }
+
+            // Fallback: external launch
+            try
+            {
+                string targetUrl = url.Trim();
+                if (!targetUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase) && 
+                    !targetUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                {
+                    targetUrl = "https://" + targetUrl;
+                }
+                await Windows.System.Launcher.LaunchUriAsync(new Uri(targetUrl));
+            }
+            catch { }
         }
     }
 }
