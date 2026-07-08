@@ -7,18 +7,20 @@
     <RootPropertyPathName Name="RepostsCount" />
     <RootPropertyPathName Name="CommentsCount" />
     <RootPropertyPathName Name="LovesCount" />
-    <RootPropertyPathName Name="LoveHeartColor" />
+    <RootPropertyPathName Name="LoveHeartStroke" />
+    <RootPropertyPathName Name="LoveHeartFill" />
     <RootPropertyPathName Name="CleanContent" />
     <RootPropertyPathName Name="FormattedTime" />
     <RootPropertyPathName Name="Poster" />
     <RootPropertyPathName Name="Name" />
     <RootPropertyPathName Name="ProfilePictureUrl" />
-    <RootPropertyPathName Name="Data" />
-    <RootPropertyPathName Name="Content" />
-    <RootPropertyPathName Name="NotificationText" />
-    <RootPropertyPathName Name="Actor" />
     <RootPropertyPathName Name="Repost" />
     <RootPropertyPathName Name="CommentMargin" />
+    <RootPropertyPathName Name="NotificationContent" />
+    <RootPropertyPathName Name="NotificationText" />
+    <RootPropertyPathName Name="Data" />
+    <RootPropertyPathName Name="Actor" />
+    <RootPropertyPathName Name="Bio" />
   </Roots.PropertyPathNames>
   <Roots.RootTypes>
     <RootType FullName="Windows.UI.Xaml.Application">
@@ -29,14 +31,19 @@
       <RootProperty Name="Color" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.Button">
+      <RootProperty Name="Width" />
+      <RootProperty Name="Margin" />
+      <RootProperty Name="Padding" />
+      <RootProperty Name="MinHeight" />
+      <RootProperty Name="Style" />
       <RootProperty Name="Content" />
       <RootProperty Name="HorizontalAlignment" />
+      <RootProperty Name="Visibility" />
       <RootProperty Name="Height" />
       <RootProperty Name="VerticalAlignment" />
-      <RootProperty Name="Margin" />
-      <RootProperty Name="Style" />
-      <RootProperty Name="Visibility" />
       <RootProperty Name="Foreground" />
+      <RootProperty Name="MinWidth" />
+      <RootProperty Name="FontSize" />
       <RootEvent Name="Click" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.Control">
@@ -48,6 +55,7 @@
       <RootProperty Name="FontSize" />
       <RootProperty Name="FontWeight" />
       <RootProperty Name="HorizontalContentAlignment" />
+      <RootProperty Name="VerticalContentAlignment" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.FrameworkElement">
       <RootProperty Name="MinHeight" />
@@ -69,6 +77,7 @@
       <RootProperty Name="TextAlignment" />
       <RootProperty Name="Visibility" />
       <RootProperty Name="Padding" />
+      <RootProperty Name="Opacity" />
       <RootEvent Name="Tapped" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.ListViewItem" />
@@ -85,7 +94,9 @@
     <RootType FullName="Microsoft.Xaml.Tools.DirectUI.ProxyTypes.ThemeResourceExtension" />
     <RootType FullName="Windows.UI.Xaml.Controls.Grid">
       <RootProperty Name="Children" />
+      <RootProperty Name="Height" />
       <RootProperty Name="Margin" />
+      <RootProperty Name="Background" />
       <RootProperty Name="ColumnDefinitions" />
       <RootProperty Name="HorizontalAlignment" />
       <RootProperty Name="RowDefinitions" />
@@ -97,8 +108,8 @@
       <RootMethod Name="SetRow" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.Pivot">
-      <RootProperty Name="Title" />
       <RootProperty Name="Items" />
+      <RootProperty Name="Title" />
       <RootEvent Name="SelectionChanged" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.PivotItem">
@@ -115,6 +126,7 @@
       <RootProperty Name="HorizontalContentAlignment" />
       <RootProperty Name="Header" />
       <RootProperty Name="ItemTemplate" />
+      <RootProperty Name="Footer" />
       <RootProperty Name="Margin" />
       <RootProperty Name="SelectionMode" />
       <RootProperty Name="ItemContainerStyle" />
@@ -128,7 +140,6 @@
       <RootProperty Name="Child" />
       <RootProperty Name="Width" />
       <RootProperty Name="Height" />
-      <RootProperty Name="CornerRadius" />
       <RootProperty Name="VerticalAlignment" />
       <RootProperty Name="Background" />
       <RootProperty Name="Visibility" />
@@ -140,6 +151,8 @@
       <RootProperty Name="VerticalAlignment" />
       <RootProperty Name="Orientation" />
       <RootProperty Name="Margin" />
+      <RootProperty Name="Background" />
+      <RootEvent Name="Tapped" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.ColumnDefinition">
       <RootProperty Name="Width" />
@@ -153,9 +166,26 @@
     <RootType FullName="Windows.UI.Xaml.DataTemplate">
       <RootProperty Name="Template" />
     </RootType>
+    <RootType FullName="Windows.UI.Xaml.Shapes.Path">
+      <RootProperty Name="Data" />
+      <RootProperty Name="Stroke" />
+      <RootProperty Name="StrokeThickness" />
+      <RootProperty Name="Width" />
+      <RootProperty Name="Height" />
+      <RootProperty Name="Stretch" />
+      <RootProperty Name="VerticalAlignment" />
+      <RootProperty Name="Margin" />
+      <RootProperty Name="RenderTransform" />
+      <RootProperty Name="Fill" />
+    </RootType>
     <RootType FullName="Windows.UI.Xaml.Data.Binding">
       <RootProperty Name="Converter" />
       <RootProperty Name="FallbackValue" />
+    </RootType>
+    <RootType FullName="Windows.UI.Xaml.Media.RotateTransform">
+      <RootProperty Name="Angle" />
+      <RootProperty Name="CenterX" />
+      <RootProperty Name="CenterY" />
     </RootType>
     <RootType FullName="Windows.UI.Xaml.Controls.CommandBar">
       <RootProperty Name="PrimaryCommands" />
@@ -199,5 +229,7 @@
     <RootType FullName="wasteof.phone.ComposePage" />
     <RootType FullName="wasteof.phone.PostDetailsPage" />
     <RootType FullName="wasteof.phone.UserProfilePage" />
+    <RootType FullName="wasteof.phone.NotificationsPage" />
+    <RootType FullName="wasteof.phone.UserListPage" />
   </Roots.RootTypes>
 </Roots>

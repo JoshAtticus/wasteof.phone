@@ -39,7 +39,7 @@
                         </Grid.ColumnDefinitions>
 
                         <!-- Profile Picture -->
-                        <Border x:ConnectionId='4' x:Name="PostProfilePictureBorder" Width="50" Height="50" CornerRadius="25" VerticalAlignment="Top" Margin="0,0,12,0" Background="{ThemeResource PhoneBorderBrush}"                                    >
+                        <Border x:ConnectionId='4' x:Name="PostProfilePictureBorder" Width="50" Height="50" VerticalAlignment="Top" Margin="0,0,12,0" Background="{ThemeResource PhoneBorderBrush}"                                    >
                             <Image x:Name="PostProfilePictureImage" Width="50" Height="50" Stretch="UniformToFill"/>
                         </Border>
 
@@ -64,9 +64,30 @@
                             </Border>
 
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                                <Button x:ConnectionId='5' x:Name="LoveButton" Content="love (0)"                          Margin="0,0,8,0" Style="{StaticResource ButtonSimpleStyle}"/>
-                                <Button x:ConnectionId='6' x:Name="RepostButton" Content="repost"                            Margin="0,0,8,0" Style="{StaticResource ButtonSimpleStyle}"/>
-                                <Button x:ConnectionId='7' x:Name="DeleteButton" Content="delete"                            Visibility="Collapsed" Foreground="Red" Style="{StaticResource ButtonSimpleStyle}"/>
+                                <!-- Love Button -->
+                                <Button x:ConnectionId='5' x:Name="LoveButton"                          Margin="0,0,12,0" Padding="16,8,16,8" MinHeight="44" Style="{StaticResource ButtonSimpleStyle}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Path x:Name="LoveIcon" Data="M 12,5 C 10,3 6,3 4,5 C 2,7 2,11 4,13 L 12,21 L 20,13 C 22,11 22,7 20,5 C 18,3 14,3 12,5 Z" Stroke="#888888" StrokeThickness="2" Fill="Transparent" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                        <TextBlock x:Name="LoveCountTextBlock" Text="0" Style="{ThemeResource BodyTextBlockStyle}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- Repost Button -->
+                                <Button x:ConnectionId='6' x:Name="RepostButton"                            Margin="0,0,12,0" Padding="16,8,16,8" MinHeight="44" Style="{StaticResource ButtonSimpleStyle}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Path Data="M 4,12 L 4,7 C 4,5 5,4 7,4 L 17,4 M 13,1 L 18,4 L 13,7 M 16,8 L 16,13 C 16,15 15,16 13,16 L 3,16 M 7,13 L 2,16 L 7,19" Stroke="{ThemeResource PhoneMutedBrush}" StrokeThickness="2" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,8,0">
+                                            <Path.RenderTransform>
+                                                <RotateTransform Angle="-30" CenterX="9" CenterY="9"/>
+                                            </Path.RenderTransform>
+                                        </Path>
+                                        <TextBlock x:Name="RepostCountTextBlock" Text="repost" Style="{ThemeResource BodyTextBlockStyle}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- Delete Button -->
+                                <Button x:ConnectionId='7' x:Name="DeleteButton"                            Visibility="Collapsed" Foreground="Red" Padding="16,8,16,8" MinHeight="44" Style="{StaticResource ButtonSimpleStyle}">
+                                    <TextBlock Text="delete" Style="{ThemeResource BodyTextBlockStyle}" VerticalAlignment="Center"/>
+                                </Button>
                             </StackPanel>
 
                             <TextBlock Text="comments" Margin="0,8,0,8" FontWeight="SemiBold" Style="{ThemeResource BodyTextBlockStyle}" Foreground="{ThemeResource PhoneAccentBrush}"/>
@@ -77,14 +98,14 @@
 
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Grid Margin="{Binding CommentMargin}" HorizontalAlignment="Stretch">
+                    <Grid Margin="{Binding CommentMargin}" HorizontalAlignment="Stretch" Background="Transparent">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
                         <!-- Profile Picture -->
-                        <Border x:ConnectionId='9' Width="32" Height="32" CornerRadius="16" VerticalAlignment="Top" Margin="0,0,10,0" Background="{ThemeResource PhoneBorderBrush}"                              >
+                        <Border x:ConnectionId='9' Width="32" Height="32" VerticalAlignment="Top" Margin="0,0,10,0" Background="{ThemeResource PhoneBorderBrush}"                              >
                             <Image Source="{Binding Poster.ProfilePictureUrl}" Width="32" Height="32" Stretch="UniformToFill"/>
                         </Border>
 
@@ -96,7 +117,10 @@
                                 </Grid.ColumnDefinitions>
                                 <!-- Clickable commenter name -->
                                 <TextBlock x:ConnectionId='10' Text="{Binding Poster.Name}" FontWeight="Bold" Style="{ThemeResource BodyTextBlockStyle}" Foreground="{ThemeResource PhoneAccentBrush}"                              />
-                                <TextBlock Grid.Column="1" Text="{Binding FormattedTime}" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource PhoneMutedBrush}"/>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <TextBlock Text="{Binding FormattedTime}" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource PhoneMutedBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <Button x:ConnectionId='11' Content="reply"                                  Padding="12,0,12,0" MinHeight="44" MinWidth="64" FontSize="12" Style="{StaticResource ButtonSimpleStyle}" VerticalAlignment="Center"/>
+                                </StackPanel>
                             </Grid>
                             <TextBlock Text="{Binding CleanContent}" TextWrapping="Wrap" Style="{ThemeResource BodyTextBlockStyle}"/>
                         </StackPanel>

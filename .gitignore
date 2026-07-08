@@ -1,2 +1,9 @@
 /.vs
 /packages
+*.appx
+*.appxupload
+*.appxsym
+*.exe
+*.pdb
+obj/*
+bin/*

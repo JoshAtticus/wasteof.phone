@@ -22,8 +22,10 @@
             <Setter Property="Foreground" Value="{StaticResource PhoneAccentBrush}"/>
             <Setter Property="FontSize" Value="16"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="MinHeight" Value="32"/>
-            <Setter Property="MinWidth" Value="60"/>
+            <Setter Property="MinHeight" Value="44"/>
+            <Setter Property="MinWidth" Value="80"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
 
         <!-- Post list view item style -->

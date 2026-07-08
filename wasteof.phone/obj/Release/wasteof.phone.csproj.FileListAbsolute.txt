@@ -58,3 +58,13 @@ c:\Users\Josh\Repos\wasteof.phone\wasteof.phone\obj\Release\qualifiers.txt.inter
 c:\Users\Josh\Repos\wasteof.phone\wasteof.phone\obj\Release\MultipleQualifiersPerDimensionFound.txt
 c:\Users\Josh\Repos\wasteof.phone\wasteof.phone\obj\Release\ProjectArchitectures.txt
 c:\Users\Josh\Repos\wasteof.phone\wasteof.phone\obj\Release\wasteof.phone.csprojResolveAssemblyReference.cache
+C:\Users\Josh\Repos\wasteof.phone\wasteof.phone\bin\Release\NotificationsPage.xbf
+C:\Users\Josh\Repos\wasteof.phone\wasteof.phone\bin\Release\UserListPage.xbf
+C:\Users\Josh\Repos\wasteof.phone\wasteof.phone\obj\Release\NotificationsPage.g.i.cs
+C:\Users\Josh\Repos\wasteof.phone\wasteof.phone\obj\Release\NotificationsPage.g.cs
+C:\Users\Josh\Repos\wasteof.phone\wasteof.phone\obj\Release\UserListPage.g.i.cs
+C:\Users\Josh\Repos\wasteof.phone\wasteof.phone\obj\Release\UserListPage.g.cs
+C:\Users\Josh\Repos\wasteof.phone\wasteof.phone\obj\Release\UserListPage.xaml
+C:\Users\Josh\Repos\wasteof.phone\wasteof.phone\obj\Release\UserListPage.xbf
+C:\Users\Josh\Repos\wasteof.phone\wasteof.phone\obj\Release\NotificationsPage.xaml
+C:\Users\Josh\Repos\wasteof.phone\wasteof.phone\obj\Release\NotificationsPage.xbf

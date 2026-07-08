@@ -7,7 +7,7 @@
 
     For more information on package manifest files, see http://go.microsoft.com/fwlink/?LinkID=241727
   -->
-  <Identity Name="06e53301-d58a-4916-8c10-dcc6a231f79b" Publisher="CN=Josh" Version="1.0.0.0" ProcessorArchitecture="neutral" />
+  <Identity Name="06e53301-d58a-4916-8c10-dcc6a231f79b" Publisher="CN=Josh" Version="1.0.0.1" ProcessorArchitecture="neutral" />
   <mp:PhoneIdentity PhoneProductId="06e53301-d58a-4916-8c10-dcc6a231f79b" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>wasteof.phone</DisplayName>

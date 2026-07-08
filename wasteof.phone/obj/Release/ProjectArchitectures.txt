@@ -1,1 +1,1 @@
-c:\Users\Josh\Repos\wasteof.phone\wasteof.phone\wasteof.phone.csproj;neutral
+C:\Users\Josh\Repos\wasteof.phone\wasteof.phone\wasteof.phone.csproj;neutral

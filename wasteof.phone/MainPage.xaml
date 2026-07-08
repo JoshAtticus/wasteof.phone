@@ -10,7 +10,7 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid x:Name="LayoutRoot">
-        <Pivot x:Name="MainPivot" Title="WASTEOF.PHONE" SelectionChanged="MainPivot_SelectionChanged">
+        <Pivot x:Name="MainPivot" SelectionChanged="MainPivot_SelectionChanged">
             
             <!-- FEED TAB -->
             <PivotItem Header="feed">

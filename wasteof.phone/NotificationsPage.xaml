@@ -14,11 +14,6 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- TitlePanel -->
-        <StackPanel Grid.Row="0" Margin="19,19,0,0">
-            <TextBlock Text="WASTEOF.PHONE" Style="{ThemeResource TitleTextBlockStyle}" Typography.Capitals="SmallCaps"/>
-        </StackPanel>
-
         <!-- Pivot Control -->
         <Pivot x:Name="NotificationsPivot" Grid.Row="1" Title="notifications" SelectionChanged="NotificationsPivot_SelectionChanged">
             <!-- UNREAD TAB -->

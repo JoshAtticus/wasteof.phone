@@ -124,7 +124,7 @@ namespace wasteof.phone.wasteof_phone_XamlTypeInfo
 
         private void InitTypeTables()
         {
-            _typeNameTable = new string[9];
+            _typeNameTable = new string[11];
             _typeNameTable[0] = "wasteof.phone.NullToVisibilityConverter";
             _typeNameTable[1] = "Object";
             _typeNameTable[2] = "wasteof.phone.MainPage";
@@ -134,8 +134,10 @@ namespace wasteof.phone.wasteof_phone_XamlTypeInfo
             _typeNameTable[6] = "wasteof.phone.ComposePage";
             _typeNameTable[7] = "wasteof.phone.PostDetailsPage";
             _typeNameTable[8] = "wasteof.phone.UserProfilePage";
+            _typeNameTable[9] = "wasteof.phone.NotificationsPage";
+            _typeNameTable[10] = "wasteof.phone.UserListPage";
 
-            _typeTable = new global::System.Type[9];
+            _typeTable = new global::System.Type[11];
             _typeTable[0] = typeof(global::wasteof.phone.NullToVisibilityConverter);
             _typeTable[1] = typeof(global::System.Object);
             _typeTable[2] = typeof(global::wasteof.phone.MainPage);
@@ -145,6 +147,8 @@ namespace wasteof.phone.wasteof_phone_XamlTypeInfo
             _typeTable[6] = typeof(global::wasteof.phone.ComposePage);
             _typeTable[7] = typeof(global::wasteof.phone.PostDetailsPage);
             _typeTable[8] = typeof(global::wasteof.phone.UserProfilePage);
+            _typeTable[9] = typeof(global::wasteof.phone.NotificationsPage);
+            _typeTable[10] = typeof(global::wasteof.phone.UserListPage);
         }
 
         private int LookupTypeIndexByName(string typeName)
@@ -185,6 +189,8 @@ namespace wasteof.phone.wasteof_phone_XamlTypeInfo
         private object Activate_6_ComposePage() { return new global::wasteof.phone.ComposePage(); }
         private object Activate_7_PostDetailsPage() { return new global::wasteof.phone.PostDetailsPage(); }
         private object Activate_8_UserProfilePage() { return new global::wasteof.phone.UserProfilePage(); }
+        private object Activate_9_NotificationsPage() { return new global::wasteof.phone.NotificationsPage(); }
+        private object Activate_10_UserListPage() { return new global::wasteof.phone.UserListPage(); }
 
         private global::Windows.UI.Xaml.Markup.IXamlType CreateXamlType(int typeIndex)
         {
@@ -246,6 +252,20 @@ namespace wasteof.phone.wasteof_phone_XamlTypeInfo
             case 8:   //  wasteof.phone.UserProfilePage
                 userType = new global::wasteof.phone.wasteof_phone_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
                 userType.Activator = Activate_8_UserProfilePage;
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 9:   //  wasteof.phone.NotificationsPage
+                userType = new global::wasteof.phone.wasteof_phone_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
+                userType.Activator = Activate_9_NotificationsPage;
+                userType.SetIsLocalType();
+                xamlType = userType;
+                break;
+
+            case 10:   //  wasteof.phone.UserListPage
+                userType = new global::wasteof.phone.wasteof_phone_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Windows.UI.Xaml.Controls.Page"));
+                userType.Activator = Activate_10_UserListPage;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
@@ -583,5 +603,6 @@ namespace wasteof.phone.wasteof_phone_XamlTypeInfo
         }
     }
 }
+
 
 

@@ -67,7 +67,7 @@
                                 <!-- Love Button -->
                                 <Button x:ConnectionId='5' x:Name="LoveButton"                          Margin="0,0,12,0" Padding="16,8,16,8" MinHeight="44" Style="{StaticResource ButtonSimpleStyle}">
                                     <StackPanel Orientation="Horizontal">
-                                        <FontIcon x:Name="LoveIcon" FontFamily="Segoe UI Symbol" Glyph="&#x2661;" Foreground="#888888" FontSize="16" Margin="0,0,8,0"/>
+                                        <Path x:Name="LoveIcon" Data="M 12,5 C 10,3 6,3 4,5 C 2,7 2,11 4,13 L 12,21 L 20,13 C 22,11 22,7 20,5 C 18,3 14,3 12,5 Z" Stroke="#888888" StrokeThickness="2" Fill="Transparent" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,8,0"/>
                                         <TextBlock x:Name="LoveCountTextBlock" Text="0" Style="{ThemeResource BodyTextBlockStyle}" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
@@ -75,7 +75,11 @@
                                 <!-- Repost Button -->
                                 <Button x:ConnectionId='6' x:Name="RepostButton"                            Margin="0,0,12,0" Padding="16,8,16,8" MinHeight="44" Style="{StaticResource ButtonSimpleStyle}">
                                     <StackPanel Orientation="Horizontal">
-                                        <SymbolIcon Symbol="Sync" Foreground="{ThemeResource PhoneMutedBrush}" Margin="0,0,8,0"/>
+                                        <Path Data="M 4,12 L 4,7 C 4,5 5,4 7,4 L 17,4 M 13,1 L 18,4 L 13,7 M 16,8 L 16,13 C 16,15 15,16 13,16 L 3,16 M 7,13 L 2,16 L 7,19" Stroke="{ThemeResource PhoneMutedBrush}" StrokeThickness="2" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,8,0">
+                                            <Path.RenderTransform>
+                                                <RotateTransform Angle="-30" CenterX="9" CenterY="9"/>
+                                            </Path.RenderTransform>
+                                        </Path>
                                         <TextBlock x:Name="RepostCountTextBlock" Text="repost" Style="{ThemeResource BodyTextBlockStyle}" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
