@@ -14,7 +14,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Pivot x:Name="NotificationsPivot" Grid.Row="1" Title="notifications" SelectionChanged="NotificationsPivot_SelectionChanged">
+        <Pivot x:Name="NotificationsPivot" Grid.Row="1" Title="messages" SelectionChanged="NotificationsPivot_SelectionChanged">
             <PivotItem Header="unread">
                 <Grid>
                     <ProgressBar x:Name="UnreadProgressBar" VerticalAlignment="Top" IsIndeterminate="True" Visibility="Collapsed"/>
