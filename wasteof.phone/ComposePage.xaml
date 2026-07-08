@@ -37,12 +37,64 @@
                      HorizontalAlignment="Stretch"
                      TextChanged="PostContentTextBox_TextChanged"/>
 
-            <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,8,0,8" Height="100" HorizontalAlignment="Stretch">
-                <StackPanel x:Name="ImagesPreviewStackPanel" Orientation="Horizontal"/>
-            </ScrollViewer>
+            <Grid Grid.Row="2" Height="110" Margin="0,8,0,8">
+                <GridView x:Name="ImagesGridView"
+                          SelectionMode="None"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                          ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                          ScrollViewer.HorizontalScrollMode="Enabled"
+                          ScrollViewer.VerticalScrollMode="Disabled">
+                    <GridView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <ItemsStackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </GridView.ItemsPanel>
+                    <GridView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Width="100" Height="100" Margin="0,0,8,0" Background="{ThemeResource PhoneBorderBrush}"
+                                  ManipulationMode="TranslateX"
+                                  ManipulationDelta="PreviewGrid_ManipulationDelta"
+                                  ManipulationCompleted="PreviewGrid_ManipulationCompleted"
+                                  Tapped="PreviewGrid_Tapped">
+                                <Image Source="{Binding}" Stretch="UniformToFill" Width="100" Height="100"/>
+                            </Grid>
+                        </DataTemplate>
+                    </GridView.ItemTemplate>
+                </GridView>
+
+                <!-- Loading Spinner for Uploads -->
+                <ProgressRing x:Name="UploadProgressRing" 
+                              Width="40" 
+                              Height="40" 
+                              IsActive="False" 
+                              HorizontalAlignment="Center" 
+                              VerticalAlignment="Center"
+                              Foreground="{ThemeResource PhoneAccentBrush}"/>
+            </Grid>
 
             <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,12">
                 <TextBlock x:Name="CharCountTextBlock" Text="0 / 5000" Style="{ThemeResource BodyTextBlockStyle}" Foreground="{ThemeResource PhoneMutedBrush}"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Large Image Preview Overlay -->
+        <Grid x:Name="ImagePreviewModal" Grid.RowSpan="2" Background="#F2000000" Visibility="Collapsed" Tapped="ImagePreviewModal_BackdropTapped">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Image x:Name="LargePreviewImage" Stretch="Uniform" Margin="24,24,24,12" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+
+            <StackPanel Grid.Row="1" Margin="24,0,24,24">
+                <Button Content="delete image" 
+                        Click="DeletePreviewedImageButton_Click" 
+                        Foreground="Red" 
+                        HorizontalAlignment="Stretch" 
+                        Margin="0,0,0,12"/>
+                <Button Content="close" 
+                        Click="ClosePreviewButton_Click" 
+                        HorizontalAlignment="Stretch"/>
             </StackPanel>
         </Grid>
     </Grid>

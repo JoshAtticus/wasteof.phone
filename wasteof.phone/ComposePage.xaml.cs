@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -21,11 +22,12 @@ namespace wasteof.phone
     public sealed partial class ComposePage : Page
     {
         private string _repostId = null;
-        private readonly List<string> _uploadedImageUrls = new List<string>();
+        private readonly ObservableCollection<string> _uploadedImageUrls = new ObservableCollection<string>();
 
         public ComposePage()
         {
             this.InitializeComponent();
+            ImagesGridView.ItemsSource = _uploadedImageUrls;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -48,7 +50,6 @@ namespace wasteof.phone
             }
 
             _uploadedImageUrls.Clear();
-            UpdateImagesPreview();
             PostContentTextBox.Focus(FocusState.Programmatic);
         }
 
@@ -164,6 +165,7 @@ namespace wasteof.phone
             PostContentTextBox.IsEnabled = false;
             PostAppBarButton.IsEnabled = false;
             AddImageAppBarButton.IsEnabled = false;
+            UploadProgressRing.IsActive = true;
 
             try
             {
@@ -198,7 +200,6 @@ namespace wasteof.phone
                         if (uploadResult != null && uploadResult.Success && !string.IsNullOrEmpty(uploadResult.Url))
                         {
                             _uploadedImageUrls.Add(uploadResult.Url);
-                            UpdateImagesPreview();
                         }
                         else
                         {
@@ -224,120 +225,103 @@ namespace wasteof.phone
                 PostContentTextBox.IsEnabled = true;
                 PostAppBarButton.IsEnabled = true;
                 AddImageAppBarButton.IsEnabled = true;
+                UploadProgressRing.IsActive = false;
             }
         }
 
-        private void UpdateImagesPreview()
+        private string _previewingImageUrl = null;
+
+        private void PreviewGrid_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
-            ImagesPreviewStackPanel.Children.Clear();
-            for (int index = 0; index < _uploadedImageUrls.Count; index++)
+            var grid = sender as Grid;
+            if (grid != null)
             {
-                var url = _uploadedImageUrls[index];
-                var itemUI = CreateImagePreviewItem(url, index);
-                ImagesPreviewStackPanel.Children.Add(itemUI);
+                var url = grid.DataContext as string;
+                if (url != null)
+                {
+                    _previewingImageUrl = url;
+                    LargePreviewImage.Source = new BitmapImage(new Uri(url));
+                    ImagePreviewModal.Visibility = Visibility.Visible;
+                }
             }
         }
 
-        private Grid CreateImagePreviewItem(string url, int index)
+        private void ClosePreviewButton_Click(object sender, RoutedEventArgs e)
         {
-            var itemGrid = new Grid
-            {
-                Width = 90,
-                Height = 90,
-                Margin = new Thickness(0, 0, 8, 0),
-                Background = new SolidColorBrush(Windows.UI.Colors.Transparent)
-            };
-
-            // Main preview image
-            var image = new Image
-            {
-                Source = new BitmapImage(new Uri(url)),
-                Width = 90,
-                Height = 90,
-                Stretch = Stretch.UniformToFill
-            };
-            itemGrid.Children.Add(image);
-
-            // Overlay toolbar for sorting/deleting
-            var overlay = new Grid
-            {
-                Height = 28,
-                VerticalAlignment = VerticalAlignment.Bottom,
-                Background = new SolidColorBrush(Windows.UI.Color.FromArgb(160, 0, 0, 0))
-            };
-            overlay.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            overlay.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            overlay.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
-            // Move left
-            var btnLeft = new Button
-            {
-                Content = "←",
-                Padding = new Thickness(0),
-                MinWidth = 0,
-                MinHeight = 0,
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Stretch,
-                Background = new SolidColorBrush(Windows.UI.Colors.Transparent),
-                FontSize = 12,
-                IsEnabled = index > 0
-            };
-            btnLeft.Click += (s, e) => { MoveImage(index, index - 1); };
-            Grid.SetColumn(btnLeft, 0);
-            overlay.Children.Add(btnLeft);
-
-            // Remove
-            var btnDelete = new Button
-            {
-                Content = "✕",
-                Padding = new Thickness(0),
-                MinWidth = 0,
-                MinHeight = 0,
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Stretch,
-                Background = new SolidColorBrush(Windows.UI.Colors.Transparent),
-                Foreground = new SolidColorBrush(Windows.UI.Colors.Red),
-                FontSize = 12
-            };
-            btnDelete.Click += (s, e) => { RemoveImage(index); };
-            Grid.SetColumn(btnDelete, 1);
-            overlay.Children.Add(btnDelete);
-
-            // Move right
-            var btnRight = new Button
-            {
-                Content = "→",
-                Padding = new Thickness(0),
-                MinWidth = 0,
-                MinHeight = 0,
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Stretch,
-                Background = new SolidColorBrush(Windows.UI.Colors.Transparent),
-                FontSize = 12,
-                IsEnabled = index < _uploadedImageUrls.Count - 1
-            };
-            btnRight.Click += (s, e) => { MoveImage(index, index + 1); };
-            Grid.SetColumn(btnRight, 2);
-            overlay.Children.Add(btnRight);
-
-            itemGrid.Children.Add(overlay);
-            return itemGrid;
+            ImagePreviewModal.Visibility = Visibility.Collapsed;
+            _previewingImageUrl = null;
         }
 
-        private void MoveImage(int oldIndex, int newIndex)
+        private void DeletePreviewedImageButton_Click(object sender, RoutedEventArgs e)
         {
-            if (newIndex < 0 || newIndex >= _uploadedImageUrls.Count) return;
-            var temp = _uploadedImageUrls[oldIndex];
-            _uploadedImageUrls.RemoveAt(oldIndex);
-            _uploadedImageUrls.Insert(newIndex, temp);
-            UpdateImagesPreview();
+            if (!string.IsNullOrEmpty(_previewingImageUrl))
+            {
+                _uploadedImageUrls.Remove(_previewingImageUrl);
+                _previewingImageUrl = null;
+            }
+            ImagePreviewModal.Visibility = Visibility.Collapsed;
         }
 
-        private void RemoveImage(int index)
+        private void ImagePreviewModal_BackdropTapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
-            if (index < 0 || index >= _uploadedImageUrls.Count) return;
-            _uploadedImageUrls.RemoveAt(index);
-            UpdateImagesPreview();
+            if (e.OriginalSource == ImagePreviewModal)
+            {
+                ImagePreviewModal.Visibility = Visibility.Collapsed;
+                _previewingImageUrl = null;
+            }
+        }
+
+        private void PreviewGrid_ManipulationDelta(object sender, Windows.UI.Xaml.Input.ManipulationDeltaRoutedEventArgs e)
+        {
+            var grid = sender as Grid;
+            if (grid == null) return;
+
+            var transform = grid.RenderTransform as CompositeTransform;
+            if (transform == null)
+            {
+                transform = new CompositeTransform();
+                grid.RenderTransform = transform;
+            }
+
+            transform.TranslateX += e.Delta.Translation.X;
+        }
+
+        private void PreviewGrid_ManipulationCompleted(object sender, Windows.UI.Xaml.Input.ManipulationCompletedRoutedEventArgs e)
+        {
+            var grid = sender as Grid;
+            if (grid == null) return;
+
+            var transform = grid.RenderTransform as CompositeTransform;
+            if (transform != null)
+            {
+                double shift = transform.TranslateX;
+                transform.TranslateX = 0; // Reset visual position instantly
+
+                var url = grid.DataContext as string;
+                if (url != null)
+                {
+                    int index = _uploadedImageUrls.IndexOf(url);
+                    if (index != -1)
+                    {
+                        if (shift < -40) // Dragged left by more than 40px
+                        {
+                            int newIndex = index - 1;
+                            if (newIndex >= 0)
+                            {
+                                _uploadedImageUrls.Move(index, newIndex);
+                            }
+                        }
+                        else if (shift > 40) // Dragged right by more than 40px
+                        {
+                            int newIndex = index + 1;
+                            if (newIndex < _uploadedImageUrls.Count)
+                            {
+                                _uploadedImageUrls.Move(index, newIndex);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private class UploadResponse
