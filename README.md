@@ -6,7 +6,7 @@ wasteof.phone is an awesome wasteof.money client for Windows Phone 8.1!
 
 **To use wasteof.phone, you'll first need to create an account on another device at https://wasteof.money/join. You can't create an account with any third party clients.**
 
-wasteof.phone is **not compatible with Windows Phone 8.0**, and is not signed, so you will likely experience **issues with Windows 10 Mobile**.
+wasteof.phone is **not compatible with Windows Phone 8.0**, and is not signed, so you will likely experience **issues with Windows 10 Mobile**. wasteof.phone has been tested on Lumia 520 (GDR0), Lumia 530 (GDR1) and Lumia 640 (GDR2)
 
 ## Screenshots
 <img width="30%" alt="wp_ss_20260708_0005" src="https://github.com/user-attachments/assets/90422563-a665-44e5-96da-8f31daa6b8d6" />
