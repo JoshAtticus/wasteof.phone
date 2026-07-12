@@ -43,8 +43,17 @@
 
                                             <RichTextBlock helpers:HtmlHelper.Html="{Binding DisplayHtml}" FontSize="15" TextWrapping="Wrap"/>
 
-                                            <!-- Image Display -->
-                                            <Image Source="{Binding DisplayFirstImageUrl}" MaxHeight="200" Stretch="UniformToFill" HorizontalAlignment="Left" Margin="0,8,0,0" Visibility="{Binding DisplayImageVisibility}"/>
+                                            <!-- Swipeable Images Carousel -->
+                                            <FlipView ItemsSource="{Binding DisplayImageUrls}" Visibility="{Binding DisplayImageVisibility}" Height="200" HorizontalAlignment="Stretch" Margin="0,8,0,0">
+                                                <FlipView.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Grid MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                                                            <ProgressRing x:Name="ImageProgress" IsActive="True" Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            <Image Source="{Binding}" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Top" ImageOpened="Image_ImageOpened" ImageFailed="Image_ImageFailed" Tapped="PostImage_Tapped"/>
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </FlipView.ItemTemplate>
+                                            </FlipView>
 
                                             <Border BorderBrush="{StaticResource PhoneAccentBrush}" BorderThickness="2,0,0,0" Padding="6,0,0,0" Margin="0,4,0,4" Visibility="{Binding NormalRepostBorderVisibility}">
                                                 <StackPanel>
@@ -125,8 +134,17 @@
 
                                             <RichTextBlock helpers:HtmlHelper.Html="{Binding DisplayHtml}" FontSize="15" TextWrapping="Wrap"/>
 
-                                            <!-- Image Display -->
-                                            <Image Source="{Binding DisplayFirstImageUrl}" MaxHeight="200" Stretch="UniformToFill" HorizontalAlignment="Left" Margin="0,8,0,0" Visibility="{Binding DisplayImageVisibility}"/>
+                                            <!-- Swipeable Images Carousel -->
+                                            <FlipView ItemsSource="{Binding DisplayImageUrls}" Visibility="{Binding DisplayImageVisibility}" Height="200" HorizontalAlignment="Stretch" Margin="0,8,0,0">
+                                                <FlipView.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Grid MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                                                            <ProgressRing x:Name="ImageProgress" IsActive="True" Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            <Image Source="{Binding}" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Top" ImageOpened="Image_ImageOpened" ImageFailed="Image_ImageFailed" Tapped="PostImage_Tapped"/>
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </FlipView.ItemTemplate>
+                                            </FlipView>
 
                                             <Border BorderBrush="{StaticResource PhoneAccentBrush}" BorderThickness="2,0,0,0" Padding="6,0,0,0" Margin="0,4,0,4" Visibility="{Binding NormalRepostBorderVisibility}">
                                                 <StackPanel>
@@ -199,9 +217,13 @@
                                         </Border>
 
                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                            <TextBlock x:Name="AccountDisplayName" Text="Display Name" FontWeight="Bold" Style="{ThemeResource SubheaderTextBlockStyle}"/>
-                                            <TextBlock x:Name="AccountBio" Text="Bio text goes here..." TextWrapping="Wrap" Margin="0,4,0,12" Style="{ThemeResource BodyTextBlockStyle}"/>
-                                        </StackPanel>
+                                             <TextBlock x:Name="AccountDisplayName" Text="Display Name" FontWeight="Bold" Style="{ThemeResource SubheaderTextBlockStyle}"/>
+                                             <TextBlock x:Name="AccountBio" Text="Bio text goes here..." TextWrapping="Wrap" Margin="0,4,0,8" Style="{ThemeResource BodyTextBlockStyle}"/>
+                                             <StackPanel Orientation="Horizontal">
+                                                 <Button x:Name="EditBioButton" Content="edit profile" Click="EditBioButton_Click" Style="{StaticResource ButtonSimpleStyle}" Padding="12,4,12,4" MinHeight="32" Margin="0,0,8,0"/>
+                                                 <Button x:Name="SwitchAccountButton" Content="switch account" Click="SwitchAccountButton_Click" Style="{StaticResource ButtonSimpleStyle}" Padding="12,4,12,4" MinHeight="32"/>
+                                             </StackPanel>
+                                         </StackPanel>
                                     </Grid>
 
                                     <Grid Margin="0,8,0,8">
@@ -253,8 +275,17 @@
 
                                             <RichTextBlock helpers:HtmlHelper.Html="{Binding DisplayHtml}" FontSize="15" TextWrapping="Wrap"/>
 
-                                            <!-- Image Display -->
-                                            <Image Source="{Binding DisplayFirstImageUrl}" MaxHeight="200" Stretch="UniformToFill" HorizontalAlignment="Left" Margin="0,8,0,0" Visibility="{Binding DisplayImageVisibility}"/>
+                                            <!-- Swipeable Images Carousel -->
+                                            <FlipView ItemsSource="{Binding DisplayImageUrls}" Visibility="{Binding DisplayImageVisibility}" Height="200" HorizontalAlignment="Stretch" Margin="0,8,0,0">
+                                                <FlipView.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Grid MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                                                            <ProgressRing x:Name="ImageProgress" IsActive="True" Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            <Image Source="{Binding}" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Top" ImageOpened="Image_ImageOpened" ImageFailed="Image_ImageFailed" Tapped="PostImage_Tapped"/>
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </FlipView.ItemTemplate>
+                                            </FlipView>
 
                                             <Border BorderBrush="{StaticResource PhoneAccentBrush}" BorderThickness="2,0,0,0" Padding="6,0,0,0" Margin="0,4,0,4" Visibility="{Binding NormalRepostBorderVisibility}">
                                                 <StackPanel>
@@ -305,6 +336,27 @@
                 </Grid>
             </PivotItem>
         </Pivot>
+
+        <!-- Fullscreen Image Preview Overlay -->
+        <Grid x:Name="FullscreenImageOverlay" Grid.RowSpan="2" Background="#F2000000" Visibility="Collapsed" Canvas.ZIndex="1000">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <ScrollViewer ZoomMode="Enabled" MinZoomFactor="1" MaxZoomFactor="5" HorizontalScrollMode="Enabled" VerticalScrollMode="Enabled" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <Image x:Name="FullscreenImage" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </ScrollViewer>
+
+            <Grid Grid.Row="1" Margin="24,0,24,24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button Content="download" Click="DownloadFullscreenImage_Click" HorizontalAlignment="Stretch" Margin="0,0,6,0"/>
+                <Button Content="close" Click="CloseFullscreenImage_Click" Grid.Column="1" HorizontalAlignment="Stretch" Margin="6,0,0,0"/>
+            </Grid>
+        </Grid>
     </Grid>
 
     <Page.BottomAppBar>

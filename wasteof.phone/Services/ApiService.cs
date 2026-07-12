@@ -57,6 +57,11 @@ namespace wasteof.phone.Services
             localSettings.Values["token"] = token;
             localSettings.Values["username"] = CurrentUsername;
 
+            if (!string.IsNullOrEmpty(token) && !string.IsNullOrEmpty(CurrentUsername))
+            {
+                SaveAccount(CurrentUsername, token);
+            }
+
             _httpClient.DefaultRequestHeaders.Remove("authorization");
             if (!string.IsNullOrEmpty(Token))
             {
@@ -72,8 +77,74 @@ namespace wasteof.phone.Services
             var localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
             localSettings.Values.Remove("token");
             localSettings.Values.Remove("username");
+            localSettings.Values.Remove("sessions");
 
             _httpClient.DefaultRequestHeaders.Remove("authorization");
+        }
+
+        public List<SavedAccount> GetSavedAccounts()
+        {
+            var localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
+            if (localSettings.Values.ContainsKey("sessions"))
+            {
+                try
+                {
+                    var json = localSettings.Values["sessions"] as string;
+                    if (!string.IsNullOrEmpty(json))
+                    {
+                        return JsonConvert.DeserializeObject<List<SavedAccount>>(json);
+                    }
+                }
+                catch { }
+            }
+            
+            var list = new List<SavedAccount>();
+            if (IsLoggedIn && !string.IsNullOrEmpty(CurrentUsername))
+            {
+                list.Add(new SavedAccount { Username = CurrentUsername, Token = Token });
+            }
+            return list;
+        }
+
+        private void SaveAccount(string username, string token)
+        {
+            var accounts = GetSavedAccounts();
+            accounts.RemoveAll(a => a.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
+            accounts.Add(new SavedAccount { Username = username.ToLowerInvariant(), Token = token });
+            
+            var localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
+            localSettings.Values["sessions"] = JsonConvert.SerializeObject(accounts);
+        }
+
+        public void SwitchAccount(string username)
+        {
+            var accounts = GetSavedAccounts();
+            var target = accounts.Find(a => a.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
+            if (target != null)
+            {
+                SaveSession(target.Token, target.Username);
+            }
+        }
+
+        public void RemoveAccount(string username)
+        {
+            var accounts = GetSavedAccounts();
+            accounts.RemoveAll(a => a.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
+            
+            var localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
+            localSettings.Values["sessions"] = JsonConvert.SerializeObject(accounts);
+            
+            if (CurrentUsername != null && CurrentUsername.Equals(username, StringComparison.OrdinalIgnoreCase))
+            {
+                if (accounts.Count > 0)
+                {
+                    SaveSession(accounts[0].Token, accounts[0].Username);
+                }
+                else
+                {
+                    ClearSession();
+                }
+            }
         }
 
         public async Task<bool> LoginAsync(string username, string password)
@@ -192,6 +263,74 @@ namespace wasteof.phone.Services
                 {
                     var responseJson = await response.Content.ReadAsStringAsync();
                     return JsonConvert.DeserializeObject<Post>(responseJson);
+                }
+            }
+            catch (Exception) { }
+            return null;
+        }
+
+        public async Task<Post> EditPostAsync(string postId, string newContent)
+        {
+            try
+            {
+                var requestBody = new Dictionary<string, string> { { "post", newContent } };
+                var json = JsonConvert.SerializeObject(requestBody);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await _httpClient.PutAsync($"posts/{postId}", content);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseJson = await response.Content.ReadAsStringAsync();
+                    return JsonConvert.DeserializeObject<Post>(responseJson);
+                }
+            }
+            catch (Exception) { }
+            return null;
+        }
+
+        public async Task<bool> UpdateBioAsync(string bio)
+        {
+            try
+            {
+                var requestBody = new Dictionary<string, string> { { "bio", bio } };
+                var json = JsonConvert.SerializeObject(requestBody);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await _httpClient.PutAsync($"users/{CurrentUsername}/bio", content);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception) { }
+            return false;
+        }
+
+        public async Task<CommentResponse> GetWallCommentsAsync(string username, int page = 1)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"users/{username.ToLowerInvariant()}/wall?page={page}");
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    return JsonConvert.DeserializeObject<CommentResponse>(json);
+                }
+            }
+            catch (Exception) { }
+            return null;
+        }
+
+        public async Task<Comment> CreateWallCommentAsync(string username, string contentText, string parentCommentId = null)
+        {
+            try
+            {
+                var requestBody = new CreateCommentRequest { Content = contentText, Parent = parentCommentId };
+                var json = JsonConvert.SerializeObject(requestBody);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await _httpClient.PostAsync($"users/{username.ToLowerInvariant()}/wall", content);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseJson = await response.Content.ReadAsStringAsync();
+                    return JsonConvert.DeserializeObject<Comment>(responseJson);
                 }
             }
             catch (Exception) { }

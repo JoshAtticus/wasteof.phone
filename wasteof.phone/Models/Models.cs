@@ -190,7 +190,46 @@ namespace wasteof.phone.Models
         }
         
         [JsonIgnore]
-        public Visibility ImageVisibility => !string.IsNullOrEmpty(FirstImageUrl) ? Visibility.Visible : Visibility.Collapsed;
+        public List<string> ImageUrls
+        {
+            get
+            {
+                var urls = new List<string>();
+                if (string.IsNullOrEmpty(Content)) return urls;
+                try
+                {
+                    int index = 0;
+                    while (true)
+                    {
+                        index = Content.IndexOf("<img", index);
+                        if (index == -1) break;
+                        
+                        int srcIndex = Content.IndexOf("src=", index);
+                        if (srcIndex != -1)
+                        {
+                            char quoteChar = Content[srcIndex + 4];
+                            if (quoteChar == '"' || quoteChar == '\'')
+                            {
+                                int start = srcIndex + 5;
+                                int end = Content.IndexOf(quoteChar, start);
+                                if (end != -1)
+                                {
+                                    urls.Add(Content.Substring(start, end - start));
+                                    index = end + 1;
+                                    continue;
+                                }
+                            }
+                        }
+                        index += 4;
+                    }
+                }
+                catch { }
+                return urls;
+            }
+        }
+        
+        [JsonIgnore]
+        public Visibility ImageVisibility => (ImageUrls.Count > 0) ? Visibility.Visible : Visibility.Collapsed;
 
         // Empty Repost UI redirection helpers
         [JsonIgnore]
@@ -210,6 +249,9 @@ namespace wasteof.phone.Models
 
         [JsonIgnore]
         public string DisplayFirstImageUrl => IsEmptyRepost ? Repost.FirstImageUrl : FirstImageUrl;
+
+        [JsonIgnore]
+        public List<string> DisplayImageUrls => IsEmptyRepost ? Repost.ImageUrls : ImageUrls;
 
         [JsonIgnore]
         public Visibility DisplayImageVisibility => IsEmptyRepost ? Repost.ImageVisibility : ImageVisibility;
@@ -626,5 +668,14 @@ namespace wasteof.phone.Models
     {
         [JsonProperty("following")]
         public List<User> Following { get; set; }
+    }
+
+    public class SavedAccount
+    {
+        [JsonProperty("username")]
+        public string Username { get; set; }
+
+        [JsonProperty("token")]
+        public string Token { get; set; }
     }
 }

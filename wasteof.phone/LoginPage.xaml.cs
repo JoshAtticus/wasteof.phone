@@ -16,11 +16,21 @@ namespace wasteof.phone
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            Frame.BackStack.Clear();
-            
-            if (ApiService.Instance.IsLoggedIn)
+            bool isAdding = false;
+            var param = e.Parameter as string;
+            if (param != null && param == "add")
             {
-                Frame.Navigate(typeof(MainPage));
+                isAdding = true;
+            }
+
+            if (!isAdding)
+            {
+                Frame.BackStack.Clear();
+                
+                if (ApiService.Instance.IsLoggedIn)
+                {
+                    Frame.Navigate(typeof(MainPage));
+                }
             }
         }
 

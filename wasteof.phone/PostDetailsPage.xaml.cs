@@ -99,14 +99,15 @@ namespace wasteof.phone
             PostTimeTextBlock.Text = _post.FormattedTime;
             Helpers.HtmlHelper.SetHtml(PostContentTextBlock, _post.Content);
 
-            if (!string.IsNullOrEmpty(_post.FirstImageUrl))
+            var urls = _post.ImageUrls;
+            if (urls.Count > 0)
             {
-                PostImage.Source = new BitmapImage(new Uri(_post.FirstImageUrl));
-                PostImage.Visibility = Visibility.Visible;
+                PostImagesFlipView.ItemsSource = urls;
+                PostImagesFlipView.Visibility = Visibility.Visible;
             }
             else
             {
-                PostImage.Visibility = Visibility.Collapsed;
+                PostImagesFlipView.Visibility = Visibility.Collapsed;
             }
 
             if (_post.Repost != null)
@@ -126,10 +127,12 @@ namespace wasteof.phone
                 _post.Poster.Name.Equals(ApiService.Instance.CurrentUsername, StringComparison.OrdinalIgnoreCase))
             {
                 DeleteButton.Visibility = Visibility.Visible;
+                EditButton.Visibility = Visibility.Visible;
             }
             else
             {
                 DeleteButton.Visibility = Visibility.Collapsed;
+                EditButton.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -354,6 +357,121 @@ namespace wasteof.phone
         {
             _replyParentId = null;
             ReplyToIndicator.Visibility = Visibility.Collapsed;
+        }
+
+        private void EditButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_post != null)
+            {
+                Frame.Navigate(typeof(ComposePage), "edit:" + _post.Id);
+            }
+        }
+
+        private void PostImage_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            var image = sender as Image;
+            if (image != null)
+            {
+                var bitmapImage = image.Source as BitmapImage;
+                if (bitmapImage != null)
+                {
+                    string url = bitmapImage.UriSource != null ? bitmapImage.UriSource.ToString() : null;
+                    if (!string.IsNullOrEmpty(url))
+                    {
+                        FullscreenImage.Source = new BitmapImage(new Uri(url));
+                        FullscreenImageOverlay.Visibility = Visibility.Visible;
+                    }
+                }
+            }
+        }
+
+        private void CloseFullscreenImage_Click(object sender, RoutedEventArgs e)
+        {
+            FullscreenImageOverlay.Visibility = Visibility.Collapsed;
+            FullscreenImage.Source = null;
+        }
+
+        private async void DownloadFullscreenImage_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            if (button == null) return;
+
+            button.IsEnabled = false;
+            try
+            {
+                var bitmapImage = FullscreenImage.Source as BitmapImage;
+                if (bitmapImage != null && bitmapImage.UriSource != null)
+                {
+                    string url = bitmapImage.UriSource.ToString();
+                    using (var client = new System.Net.Http.HttpClient())
+                    {
+                        var bytes = await client.GetByteArrayAsync(url);
+                        string fileName = "wasteof_image_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".jpg";
+                        int lastSlash = url.LastIndexOf('/');
+                        if (lastSlash != -1 && lastSlash < url.Length - 1)
+                        {
+                            string potentialName = url.Substring(lastSlash + 1);
+                            int qIdx = potentialName.IndexOf('?');
+                            if (qIdx != -1) potentialName = potentialName.Substring(0, qIdx);
+                            if (potentialName.EndsWith(".jpg") || potentialName.EndsWith(".jpeg") || potentialName.EndsWith(".png") || potentialName.EndsWith(".gif"))
+                            {
+                                fileName = potentialName;
+                            }
+                        }
+
+                        var file = await Windows.Storage.KnownFolders.PicturesLibrary.CreateFileAsync(fileName, Windows.Storage.CreationCollisionOption.GenerateUniqueName);
+                        await Windows.Storage.FileIO.WriteBytesAsync(file, bytes);
+
+                        var dialog = new MessageDialog($"Image saved to Pictures Library as {file.Name}");
+                        await dialog.ShowAsync();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                var dialog = new MessageDialog("Failed to download image: " + ex.Message);
+                await dialog.ShowAsync();
+            }
+            finally
+            {
+                button.IsEnabled = true;
+            }
+        }
+
+        private void Image_ImageOpened(object sender, RoutedEventArgs e)
+        {
+            var image = sender as Image;
+            if (image != null)
+            {
+                var parent = image.Parent as Grid;
+                if (parent != null)
+                {
+                    var progress = parent.FindName("ImageProgress") as ProgressRing;
+                    if (progress != null)
+                    {
+                        progress.IsActive = false;
+                        progress.Visibility = Visibility.Collapsed;
+                    }
+                }
+            }
+        }
+
+        private void Image_ImageFailed(object sender, ExceptionRoutedEventArgs e)
+        {
+            var image = sender as Image;
+            if (image != null)
+            {
+                var parent = image.Parent as Grid;
+                if (parent != null)
+                {
+                    var progress = parent.FindName("ImageProgress") as ProgressRing;
+                    if (progress != null)
+                    {
+                        progress.IsActive = false;
+                        progress.Visibility = Visibility.Collapsed;
+                    }
+                }
+            }
         }
     }
 }

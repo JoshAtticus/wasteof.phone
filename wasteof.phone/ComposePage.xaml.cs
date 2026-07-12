@@ -22,6 +22,7 @@ namespace wasteof.phone
     public sealed partial class ComposePage : Page
     {
         private string _repostId = null;
+        private string _editPostId = null;
         private readonly ObservableCollection<string> _uploadedImageUrls = new ObservableCollection<string>();
 
         public ComposePage()
@@ -33,23 +34,40 @@ namespace wasteof.phone
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             var targetId = e.Parameter as string;
+            _editPostId = null;
+            _repostId = null;
+
             if (targetId != null)
             {
-                _repostId = targetId;
-                PageHeaderTitle.Text = "repost";
-                RepostIndicator.Text = $"reposting: {targetId}";
-                RepostIndicator.Visibility = Visibility.Visible;
-                PostContentTextBox.PlaceholderText = "add a comment to this repost (optional)...";
+                if (targetId.StartsWith("edit:"))
+                {
+                    _editPostId = targetId.Substring(5);
+                    PageHeaderTitle.Text = "edit post";
+                    RepostIndicator.Visibility = Visibility.Collapsed;
+                    PostContentTextBox.PlaceholderText = "edit your post...";
+
+                    LoadPostForEditingAsync(_editPostId);
+                }
+                else
+                {
+                    _repostId = targetId;
+                    PageHeaderTitle.Text = "repost";
+                    RepostIndicator.Text = $"reposting: {targetId}";
+                    RepostIndicator.Visibility = Visibility.Visible;
+                    PostContentTextBox.PlaceholderText = "add a comment to this repost (optional)...";
+                }
             }
             else
             {
-                _repostId = null;
                 PageHeaderTitle.Text = "compose";
                 RepostIndicator.Visibility = Visibility.Collapsed;
                 PostContentTextBox.PlaceholderText = "what's on your mind?";
             }
 
-            _uploadedImageUrls.Clear();
+            if (_editPostId == null)
+            {
+                _uploadedImageUrls.Clear();
+            }
             PostContentTextBox.Focus(FocusState.Programmatic);
         }
 
@@ -81,7 +99,7 @@ namespace wasteof.phone
 
             string content = finalContentBuilder.ToString().Trim();
 
-            if (string.IsNullOrEmpty(content) && string.IsNullOrEmpty(_repostId))
+            if (string.IsNullOrEmpty(content) && string.IsNullOrEmpty(_repostId) && string.IsNullOrEmpty(_editPostId))
             {
                 var dialog = new MessageDialog("Post content cannot be empty.");
                 await dialog.ShowAsync();
@@ -94,7 +112,11 @@ namespace wasteof.phone
             PostContentTextBox.IsEnabled = false;
 
             Post createdPost = null;
-            if (!string.IsNullOrEmpty(_repostId))
+            if (!string.IsNullOrEmpty(_editPostId))
+            {
+                createdPost = await ApiService.Instance.EditPostAsync(_editPostId, content);
+            }
+            else if (!string.IsNullOrEmpty(_repostId))
             {
                 createdPost = await ApiService.Instance.CreatePostAsync(content, _repostId);
             }
@@ -334,6 +356,70 @@ namespace wasteof.phone
 
             [Newtonsoft.Json.JsonProperty("filename")]
             public string Filename { get; set; }
+        }
+
+        private async void LoadPostForEditingAsync(string postId)
+        {
+            PostAppBarButton.IsEnabled = false;
+            UploadProgressRing.IsActive = true;
+            try
+            {
+                var post = await ApiService.Instance.GetPostDetailsAsync(postId);
+                if (post != null)
+                {
+                    _uploadedImageUrls.Clear();
+                    var urls = post.ImageUrls;
+                    foreach (var url in urls)
+                    {
+                        _uploadedImageUrls.Add(url);
+                    }
+
+                    string text = post.Content;
+                    text = StripImageTags(text);
+                    PostContentTextBox.Text = text.Trim();
+                }
+            }
+            catch (Exception ex)
+            {
+                var dialog = new MessageDialog("Failed to load post for editing: " + ex.Message);
+                await dialog.ShowAsync();
+            }
+            finally
+            {
+                UploadProgressRing.IsActive = false;
+                PostAppBarButton.IsEnabled = true;
+            }
+        }
+
+        private string StripImageTags(string html)
+        {
+            if (string.IsNullOrEmpty(html)) return "";
+            var text = html;
+            while (true)
+            {
+                int start = text.IndexOf("<img");
+                if (start == -1) break;
+                int end = text.IndexOf(">", start);
+                if (end == -1) break;
+
+                int closeTag = text.IndexOf("</img>", end);
+                if (closeTag != -1 && closeTag - end < 10)
+                {
+                    text = text.Remove(start, (closeTag + 6) - start);
+                }
+                else
+                {
+                    text = text.Remove(start, (end + 1) - start);
+                }
+            }
+
+            text = text.Replace("<br>", "\n").Replace("<br/>", "\n").Replace("<br />", "\n");
+            text = text.Replace("<p>", "").Replace("</p>", "\n");
+            
+            // basic decode of XML entities
+            text = text.Replace("&lt;", "<").Replace("&gt;", ">").Replace("&amp;", "&").Replace("&quot;", "\"").Replace("&#39;", "'").Replace("&nbsp;", " ");
+            
+            return text;
         }
     }
 }

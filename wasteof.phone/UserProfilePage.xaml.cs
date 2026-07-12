@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Navigation;
 using Windows.UI.Xaml.Media.Imaging;
-using Windows.UI.Xaml.Input;
 using wasteof.phone.Services;
 using wasteof.phone.Models;
 
@@ -16,9 +18,22 @@ namespace wasteof.phone
         private string _username;
         private User _user;
         private bool _isFollowing = false;
-        private List<Post> _posts = new List<Post>();
+        private ObservableCollection<Post> _posts = new ObservableCollection<Post>();
         private int _profilePostsPage = 1;
         private bool _profilePostsHasMore = true;
+
+        // Wall state
+        private int _wallPage = 1;
+        private bool _wallHasMore = true;
+        private string _replyParentId = null;
+        private ObservableCollection<Comment> _wallComments = new ObservableCollection<Comment>();
+        private bool _isWallLoaded = false;
+
+        // Following & Followers state
+        private ObservableCollection<User> _followingList = new ObservableCollection<User>();
+        private ObservableCollection<User> _followersList = new ObservableCollection<User>();
+        private bool _isFollowingLoaded = false;
+        private bool _isFollowersLoaded = false;
 
         public UserProfilePage()
         {
@@ -31,17 +46,29 @@ namespace wasteof.phone
             if (username != null)
             {
                 _username = username;
-                UsernameHeaderTextBlock.Text = username.ToLower();
+                ProfilePivot.Title = username.ToLower();
+                
+                // Reset states
+                _isWallLoaded = false;
+                _isFollowingLoaded = false;
+                _isFollowersLoaded = false;
+                ProfilePivot.SelectedIndex = 0;
+
                 await LoadProfileDataAsync();
             }
         }
 
-        private async System.Threading.Tasks.Task LoadProfileDataAsync()
+        private async Task LoadProfileDataAsync()
         {
+            ProfileProgressBar.Visibility = Visibility.Visible;
             _profilePostsPage = 1;
             _posts.Clear();
             _profilePostsHasMore = true;
+            ProfilePostsListView.ItemsSource = _posts;
+
             _user = await ApiService.Instance.GetUserProfileAsync(_username);
+            ProfileProgressBar.Visibility = Visibility.Collapsed;
+
             if (_user == null)
             {
                 var dialog = new MessageDialog("Failed to load user profile.");
@@ -51,7 +78,6 @@ namespace wasteof.phone
             }
 
             ProfilePictureImage.Source = new BitmapImage(new Uri(_user.ProfilePictureUrl));
-            BannerImage.Source = new BitmapImage(new Uri(_user.BannerUrl));
             DisplayNameTextBlock.Text = _user.Name;
             OnlineStatusTextBlock.Text = _user.Online ? "online" : "offline";
             BioTextBlock.Text = string.IsNullOrEmpty(_user.Bio) ? "no bio." : _user.Bio;
@@ -68,10 +94,12 @@ namespace wasteof.phone
                 if (_username.Equals(ApiService.Instance.CurrentUsername, StringComparison.OrdinalIgnoreCase))
                 {
                     FollowButton.Visibility = Visibility.Collapsed;
+                    EditProfileButton.Visibility = Visibility.Visible;
                 }
                 else
                 {
                     FollowButton.Visibility = Visibility.Visible;
+                    EditProfileButton.Visibility = Visibility.Collapsed;
                     _isFollowing = await ApiService.Instance.GetFollowStatusAsync(_username, ApiService.Instance.CurrentUsername);
                     UpdateFollowButtonText();
                 }
@@ -79,10 +107,38 @@ namespace wasteof.phone
             else
             {
                 FollowButton.Visibility = Visibility.Visible;
+                EditProfileButton.Visibility = Visibility.Collapsed;
                 FollowButton.Content = "follow";
             }
 
             await LoadUserPostsAsync();
+        }
+
+        private async Task LoadUserPostsAsync()
+        {
+            ProfileProgressBar.Visibility = Visibility.Visible;
+            LoadMoreProfilePostsButton.IsEnabled = false;
+
+            var result = await ApiService.Instance.GetUserPostsAsync(_username, _profilePostsPage);
+            ProfileProgressBar.Visibility = Visibility.Collapsed;
+
+            if (result != null && result.Posts != null)
+            {
+                foreach (var post in result.Posts)
+                {
+                    _posts.Add(post);
+                }
+
+                _profilePostsHasMore = result.Posts.Count >= 20;
+                LoadMoreProfilePostsButton.Visibility = _profilePostsHasMore ? Visibility.Visible : Visibility.Collapsed;
+            }
+            else
+            {
+                _profilePostsHasMore = false;
+                LoadMoreProfilePostsButton.Visibility = Visibility.Collapsed;
+            }
+
+            LoadMoreProfilePostsButton.IsEnabled = true;
         }
 
         private void UpdateFollowButtonText()
@@ -90,47 +146,275 @@ namespace wasteof.phone
             FollowButton.Content = _isFollowing ? "unfollow" : "follow";
         }
 
-        private async System.Threading.Tasks.Task AugmentPostLoveStatusAsync(IEnumerable<Post> posts)
+        // PIVOT SELECTION CHANGED
+        private async void ProfilePivot_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (posts == null || !ApiService.Instance.IsLoggedIn) return;
-
-            var username = ApiService.Instance.CurrentUsername;
-            foreach (var post in posts)
+            if (ProfilePivot.SelectedIndex == 1 && !_isWallLoaded)
             {
-                if (post != null)
-                {
-                    if (post.IsEmptyRepost && post.Repost != null)
-                    {
-                        var loved = await ApiService.Instance.GetPostLoveStatusAsync(post.Repost.Id, username);
-                        post.Repost.IsLoving = loved;
-                        post.RaisePropertyChanged("DisplayLoveHeartFill");
-                        post.RaisePropertyChanged("DisplayLoveHeartStroke");
-                    }
-                    else
-                    {
-                        var loved = await ApiService.Instance.GetPostLoveStatusAsync(post.Id, username);
-                        post.IsLoving = loved;
-                    }
-                }
+                await RefreshWallCommentsAsync();
+            }
+            else if (ProfilePivot.SelectedIndex == 2 && !_isFollowingLoaded)
+            {
+                await RefreshFollowingAsync();
+            }
+            else if (ProfilePivot.SelectedIndex == 3 && !_isFollowersLoaded)
+            {
+                await RefreshFollowersAsync();
             }
         }
 
-        private async System.Threading.Tasks.Task LoadUserPostsAsync()
+        // --- WALL COMMENTS TAB LOGIC ---
+        private async Task RefreshWallCommentsAsync()
         {
-            LoadMoreProfilePostsButton.IsEnabled = false;
-            var response = await ApiService.Instance.GetUserPostsAsync(_username, _profilePostsPage);
-            if (response != null && response.Posts != null)
+            _wallPage = 1;
+            _wallComments.Clear();
+            _wallHasMore = true;
+            WallCommentsListView.ItemsSource = _wallComments;
+            await LoadWallCommentsAsync();
+            _isWallLoaded = true;
+        }
+
+        private async Task LoadWallCommentsAsync()
+        {
+            WallProgressBar.Visibility = Visibility.Visible;
+            LoadMoreWallCommentsButton.IsEnabled = false;
+
+            var response = await ApiService.Instance.GetWallCommentsAsync(_username, _wallPage);
+            WallProgressBar.Visibility = Visibility.Collapsed;
+
+            if (response != null && response.Comments != null)
             {
-                _posts.AddRange(response.Posts);
-                UserPostsListView.ItemsSource = null;
-                UserPostsListView.ItemsSource = _posts;
+                foreach (var comment in response.Comments)
+                {
+                    comment.Level = 0;
+                    _wallComments.Add(comment);
+                    var task = FetchAndAppendRepliesBackgroundAsync(comment, 1);
+                }
 
-                _profilePostsHasMore = response.Posts.Count >= 20;
-                LoadMoreProfilePostsButton.Visibility = _profilePostsHasMore ? Visibility.Visible : Visibility.Collapsed;
-
-                var task = AugmentPostLoveStatusAsync(response.Posts);
+                _wallHasMore = response.Comments.Count >= 20;
+                LoadMoreWallCommentsButton.Visibility = _wallHasMore ? Visibility.Visible : Visibility.Collapsed;
             }
-            LoadMoreProfilePostsButton.IsEnabled = true;
+            else
+            {
+                _wallHasMore = false;
+                LoadMoreWallCommentsButton.Visibility = Visibility.Collapsed;
+            }
+
+            LoadMoreWallCommentsButton.IsEnabled = true;
+        }
+
+        private async Task FetchAndAppendRepliesBackgroundAsync(Comment parentComment, int level)
+        {
+            try
+            {
+                if (parentComment.HasReplies)
+                {
+                    int page = 1;
+                    bool hasMore = true;
+                    while (hasMore)
+                    {
+                        var response = await ApiService.Instance.GetCommentRepliesAsync(parentComment.Id, page);
+                        if (response != null && response.Comments != null && response.Comments.Count > 0)
+                        {
+                            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                            {
+                                foreach (var reply in response.Comments)
+                                {
+                                    reply.Level = level;
+                                    
+                                    int parentIndex = _wallComments.IndexOf(parentComment);
+                                    if (parentIndex != -1)
+                                    {
+                                        int targetIndex = parentIndex + 1;
+                                        while (targetIndex < _wallComments.Count && _wallComments[targetIndex].Level > parentComment.Level)
+                                        {
+                                            targetIndex++;
+                                        }
+                                        if (targetIndex > _wallComments.Count) targetIndex = _wallComments.Count;
+                                        _wallComments.Insert(targetIndex, reply);
+                                    }
+
+                                    var task = FetchAndAppendRepliesBackgroundAsync(reply, level + 1);
+                                }
+                            });
+
+                            hasMore = response.Comments.Count >= 20;
+                            page++;
+                        }
+                        else
+                        {
+                            hasMore = false;
+                        }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        private async void SendWallCommentButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!ApiService.Instance.IsLoggedIn)
+            {
+                Frame.Navigate(typeof(LoginPage));
+                return;
+            }
+
+            string content = NewWallCommentTextBox.Text.Trim();
+            if (string.IsNullOrEmpty(content)) return;
+
+            SendWallCommentButton.IsEnabled = false;
+            NewWallCommentTextBox.IsEnabled = false;
+
+            var comment = await ApiService.Instance.CreateWallCommentAsync(_username, content, _replyParentId);
+            if (comment != null)
+            {
+                NewWallCommentTextBox.Text = string.Empty;
+                ClearReplyParent();
+                await RefreshWallCommentsAsync();
+            }
+            else
+            {
+                var dialog = new MessageDialog("Failed to post wall comment.");
+                await dialog.ShowAsync();
+            }
+
+            SendWallCommentButton.IsEnabled = true;
+            NewWallCommentTextBox.IsEnabled = true;
+        }
+
+        private void WallCommentsListView_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            var comment = e.ClickedItem as Comment;
+            if (comment != null)
+            {
+                _replyParentId = comment.Id;
+                ReplyToTextBlock.Text = $"replying to @{comment.Poster.Name}";
+                ReplyToIndicator.Visibility = Visibility.Visible;
+                NewWallCommentTextBox.Focus(FocusState.Programmatic);
+            }
+        }
+
+        private void ReplyWallCommentButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            if (button == null) return;
+
+            var comment = button.DataContext as Comment;
+            if (comment != null)
+            {
+                _replyParentId = comment.Id;
+                ReplyToTextBlock.Text = $"replying to @{comment.Poster.Name}";
+                ReplyToIndicator.Visibility = Visibility.Visible;
+                NewWallCommentTextBox.Focus(FocusState.Programmatic);
+            }
+        }
+
+        private void ReplyToIndicator_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            ClearReplyParent();
+        }
+
+        private void ClearReplyParent()
+        {
+            _replyParentId = null;
+            ReplyToIndicator.Visibility = Visibility.Collapsed;
+        }
+
+        private async void LoadMoreWallCommentsButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_wallHasMore)
+            {
+                _wallPage++;
+                await LoadWallCommentsAsync();
+            }
+        }
+
+        // --- FOLLOWING TAB LOGIC ---
+        private async Task RefreshFollowingAsync()
+        {
+            FollowingProgressBar.Visibility = Visibility.Visible;
+            _followingList.Clear();
+            FollowingListView.ItemsSource = _followingList;
+
+            var list = await ApiService.Instance.GetFollowingAsync(_username);
+            FollowingProgressBar.Visibility = Visibility.Collapsed;
+
+            if (list != null)
+            {
+                foreach (var user in list)
+                {
+                    _followingList.Add(user);
+                }
+            }
+            _isFollowingLoaded = true;
+        }
+
+        private void LoadMoreFollowingButton_Click(object sender, RoutedEventArgs e)
+        {
+            // The API doesn't support pagination, loads all at once.
+        }
+
+        // --- FOLLOWERS TAB LOGIC ---
+        private async Task RefreshFollowersAsync()
+        {
+            FollowersProgressBar.Visibility = Visibility.Visible;
+            _followersList.Clear();
+            FollowersListView.ItemsSource = _followersList;
+
+            var list = await ApiService.Instance.GetFollowersAsync(_username);
+            FollowersProgressBar.Visibility = Visibility.Collapsed;
+
+            if (list != null)
+            {
+                foreach (var user in list)
+                {
+                    _followersList.Add(user);
+                }
+            }
+            _isFollowersLoaded = true;
+        }
+
+        private void LoadMoreFollowersButton_Click(object sender, RoutedEventArgs e)
+        {
+            // The API doesn't support pagination, loads all at once.
+        }
+
+        private void UserListView_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            var user = e.ClickedItem as User;
+            if (user != null)
+            {
+                Frame.Navigate(typeof(UserProfilePage), user.Name);
+            }
+        }
+
+        // --- HEADER LOGIC ---
+        private void PostsStat_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            ProfilePivot.SelectedIndex = 0;
+        }
+
+        private void FollowersStat_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            ProfilePivot.SelectedIndex = 3;
+        }
+
+        private void FollowingStat_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            ProfilePivot.SelectedIndex = 2;
+        }
+
+        private void CommenterName_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            var element = sender as FrameworkElement;
+            if (element != null)
+            {
+                var comment = element.DataContext as Comment;
+                if (comment != null && comment.Poster != null)
+                {
+                    Frame.Navigate(typeof(UserProfilePage), comment.Poster.Name);
+                }
+            }
         }
 
         private async void FollowButton_Click(object sender, RoutedEventArgs e)
@@ -153,7 +437,7 @@ namespace wasteof.phone
             FollowButton.IsEnabled = true;
         }
 
-        private void UserPostsListView_ItemClick(object sender, ItemClickEventArgs e)
+        private void ProfilePostsListView_ItemClick(object sender, ItemClickEventArgs e)
         {
             var post = e.ClickedItem as Post;
             if (post != null)
@@ -161,16 +445,6 @@ namespace wasteof.phone
                 var targetPost = (post.IsEmptyRepost && post.Repost != null) ? post.Repost : post;
                 Frame.Navigate(typeof(PostDetailsPage), targetPost.Id);
             }
-        }
-
-        private void FollowersStat_Tapped(object sender, TappedRoutedEventArgs e)
-        {
-            Frame.Navigate(typeof(UserListPage), $"followers:{_username}");
-        }
-
-        private void FollowingStat_Tapped(object sender, TappedRoutedEventArgs e)
-        {
-            Frame.Navigate(typeof(UserListPage), $"following:{_username}");
         }
 
         private async void LoveButton_Click(object sender, RoutedEventArgs e)
@@ -218,23 +492,44 @@ namespace wasteof.phone
             }
         }
 
-        private void RepostButton_Click(object sender, RoutedEventArgs e)
+        private async void RepostButton_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;
             if (button == null) return;
 
             var post = button.DataContext as Post;
-            if (post != null)
-            {
-                if (!ApiService.Instance.IsLoggedIn)
-                {
-                    Frame.Navigate(typeof(LoginPage));
-                    return;
-                }
+            if (post == null) return;
 
-                var targetPost = (post.IsEmptyRepost && post.Repost != null) ? post.Repost : post;
-                Frame.Navigate(typeof(ComposePage), targetPost.Id);
+            if (!ApiService.Instance.IsLoggedIn)
+            {
+                Frame.Navigate(typeof(LoginPage));
+                return;
             }
+
+            var targetPost = (post.IsEmptyRepost && post.Repost != null) ? post.Repost : post;
+
+            var dialog = new MessageDialog("repost this post?", "repost");
+            dialog.Commands.Add(new UICommand("repost", async (command) =>
+            {
+                button.IsEnabled = false;
+                var result = await ApiService.Instance.RepostAsync(targetPost.Id);
+                if (result != null)
+                {
+                    targetPost.RepostsCount++;
+                    if (post.IsEmptyRepost)
+                    {
+                        post.RaisePropertyChanged("DisplayRepostsCount");
+                    }
+                }
+                button.IsEnabled = true;
+            }));
+            dialog.Commands.Add(new UICommand("quote", (command) =>
+            {
+                Frame.Navigate(typeof(ComposePage), targetPost.Id);
+            }));
+            dialog.Commands.Add(new UICommand("cancel"));
+
+            await dialog.ShowAsync();
         }
 
         private async void LoadMoreProfilePostsButton_Click(object sender, RoutedEventArgs e)
@@ -243,6 +538,143 @@ namespace wasteof.phone
             {
                 _profilePostsPage++;
                 await LoadUserPostsAsync();
+            }
+        }
+
+        private async void EditProfileButton_Click(object sender, RoutedEventArgs e)
+        {
+            var textBox = new TextBox { Text = string.IsNullOrEmpty(_user.Bio) || _user.Bio == "no bio." ? "" : _user.Bio, AcceptsReturn = true, TextWrapping = TextWrapping.Wrap, Height = 120 };
+            var dialog = new ContentDialog
+            {
+                Title = "edit profile bio",
+                Content = textBox,
+                PrimaryButtonText = "save",
+                SecondaryButtonText = "cancel"
+            };
+
+            var result = await dialog.ShowAsync();
+            if (result == ContentDialogResult.Primary)
+            {
+                string newBio = textBox.Text.Trim();
+                bool success = await ApiService.Instance.UpdateBioAsync(newBio);
+                if (success)
+                {
+                    _user.Bio = newBio;
+                    BioTextBlock.Text = string.IsNullOrEmpty(newBio) ? "no bio." : newBio;
+                }
+                else
+                {
+                    var errorDialog = new MessageDialog("Failed to update profile bio.");
+                    await errorDialog.ShowAsync();
+                }
+            }
+        }
+
+        // --- IMAGE HANDLERS ---
+        private void PostImage_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            var image = sender as Image;
+            if (image != null)
+            {
+                var bitmapImage = image.Source as BitmapImage;
+                if (bitmapImage != null)
+                {
+                    string url = bitmapImage.UriSource != null ? bitmapImage.UriSource.ToString() : null;
+                    if (!string.IsNullOrEmpty(url))
+                    {
+                        FullscreenImage.Source = new BitmapImage(new Uri(url));
+                        FullscreenImageOverlay.Visibility = Visibility.Visible;
+                    }
+                }
+            }
+        }
+
+        private void CloseFullscreenImage_Click(object sender, RoutedEventArgs e)
+        {
+            FullscreenImageOverlay.Visibility = Visibility.Collapsed;
+            FullscreenImage.Source = null;
+        }
+
+        private async void DownloadFullscreenImage_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            if (button == null) return;
+
+            button.IsEnabled = false;
+            try
+            {
+                var bitmapImage = FullscreenImage.Source as BitmapImage;
+                if (bitmapImage != null && bitmapImage.UriSource != null)
+                {
+                    string url = bitmapImage.UriSource.ToString();
+                    using (var client = new System.Net.Http.HttpClient())
+                    {
+                        var bytes = await client.GetByteArrayAsync(url);
+                        string fileName = "wasteof_image_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".jpg";
+                        int lastSlash = url.LastIndexOf('/');
+                        if (lastSlash != -1 && lastSlash < url.Length - 1)
+                        {
+                            string potentialName = url.Substring(lastSlash + 1);
+                            int qIdx = potentialName.IndexOf('?');
+                            if (qIdx != -1) potentialName = potentialName.Substring(0, qIdx);
+                            if (potentialName.EndsWith(".jpg") || potentialName.EndsWith(".jpeg") || potentialName.EndsWith(".png") || potentialName.EndsWith(".gif"))
+                            {
+                                fileName = potentialName;
+                            }
+                        }
+
+                        var file = await Windows.Storage.KnownFolders.PicturesLibrary.CreateFileAsync(fileName, Windows.Storage.CreationCollisionOption.GenerateUniqueName);
+                        await Windows.Storage.FileIO.WriteBytesAsync(file, bytes);
+
+                        var dialog = new MessageDialog($"Image saved to Pictures Library as {file.Name}");
+                        await dialog.ShowAsync();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                var dialog = new MessageDialog("Failed to download image: " + ex.Message);
+                await dialog.ShowAsync();
+            }
+            finally
+            {
+                button.IsEnabled = true;
+            }
+        }
+
+        private void Image_ImageOpened(object sender, RoutedEventArgs e)
+        {
+            var image = sender as Image;
+            if (image != null)
+            {
+                var parent = image.Parent as Grid;
+                if (parent != null)
+                {
+                    var progress = parent.FindName("ImageProgress") as ProgressRing;
+                    if (progress != null)
+                    {
+                        progress.IsActive = false;
+                        progress.Visibility = Visibility.Collapsed;
+                    }
+                }
+            }
+        }
+
+        private void Image_ImageFailed(object sender, ExceptionRoutedEventArgs e)
+        {
+            var image = sender as Image;
+            if (image != null)
+            {
+                var parent = image.Parent as Grid;
+                if (parent != null)
+                {
+                    var progress = parent.FindName("ImageProgress") as ProgressRing;
+                    if (progress != null)
+                    {
+                        progress.IsActive = false;
+                        progress.Visibility = Visibility.Collapsed;
+                    }
+                }
             }
         }
     }

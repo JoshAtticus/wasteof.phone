@@ -11,144 +11,315 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid x:Name="LayoutRoot">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+        <Pivot x:Name="ProfilePivot" SelectionChanged="ProfilePivot_SelectionChanged">
+            <!-- PROFILE TAB -->
+            <PivotItem Header="profile">
+                <Grid>
+                    <ProgressBar x:Name="ProfileProgressBar" VerticalAlignment="Top" IsIndeterminate="True" Visibility="Collapsed" Canvas.ZIndex="10"/>
+                    
+                    <ListView x:Name="ProfilePostsListView" SelectionMode="None" IsItemClickEnabled="True" ItemClick="ProfilePostsListView_ItemClick" HorizontalContentAlignment="Stretch">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.Header>
+                            <Border BorderThickness="0,0,0,1" BorderBrush="{ThemeResource PhoneBorderBrush}" Margin="19,0,19,12">
+                                <StackPanel Margin="0,0,0,16">
+                                    <Grid Margin="0,0,0,12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Row="0" Margin="19,19,0,12">
-            <TextBlock x:Name="UsernameHeaderTextBlock" Text="profile" Margin="0,-6.5,0,0" Style="{ThemeResource HeaderTextBlockStyle}"/>
-        </StackPanel>
+                                        <Border Width="64" Height="64" VerticalAlignment="Center" Margin="0,0,12,0" Background="{ThemeResource PhoneBorderBrush}">
+                                            <Image x:Name="ProfilePictureImage" Width="64" Height="64" Stretch="UniformToFill"/>
+                                        </Border>
 
-        <ListView x:Name="UserPostsListView" Grid.Row="1" Margin="19,0,19,0" IsItemClickEnabled="True" ItemClick="UserPostsListView_ItemClick" HorizontalContentAlignment="Stretch">
-            <ListView.Header>
-                <StackPanel Margin="0,19,0,16">
-                    <Border Margin="0,0,0,16" BorderBrush="{ThemeResource PhoneBorderBrush}" BorderThickness="0,0,0,1" Padding="0,0,0,16">
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <TextBlock x:Name="OnlineStatusTextBlock" Text="offline" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource PhoneMutedBrush}"/>
+                                            <TextBlock x:Name="DisplayNameTextBlock" Text="Display Name" FontWeight="Bold" Style="{ThemeResource SubheaderTextBlockStyle}"/>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Button x:Name="FollowButton" Content="follow" Click="FollowButton_Click"/>
+                                            <Button x:Name="EditProfileButton" Content="edit profile" Click="EditProfileButton_Click" Visibility="Collapsed"/>
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <TextBlock x:Name="BioTextBlock" Text="User bio here..." TextWrapping="Wrap" Margin="0,0,0,16" Style="{ThemeResource BodyTextBlockStyle}"/>
+
+                                    <Grid Margin="0,0,0,16">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0" HorizontalAlignment="Center" Tapped="PostsStat_Tapped" Background="Transparent">
+                                            <TextBlock x:Name="PostsCountTextBlock" Text="0" FontWeight="Bold" HorizontalAlignment="Center" Style="{ThemeResource SubheaderTextBlockStyle}"/>
+                                            <TextBlock Text="posts" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource PhoneMutedBrush}"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" HorizontalAlignment="Center" Background="Transparent" Tapped="FollowersStat_Tapped">
+                                            <TextBlock x:Name="FollowersCountTextBlock" Text="0" FontWeight="Bold" HorizontalAlignment="Center" Style="{ThemeResource SubheaderTextBlockStyle}"/>
+                                            <TextBlock Text="followers" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource PhoneMutedBrush}"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2" HorizontalAlignment="Center" Background="Transparent" Tapped="FollowingStat_Tapped">
+                                            <TextBlock x:Name="FollowingCountTextBlock" Text="0" FontWeight="Bold" HorizontalAlignment="Center" Style="{ThemeResource SubheaderTextBlockStyle}"/>
+                                            <TextBlock Text="following" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource PhoneMutedBrush}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    <TextBlock Text="recent posts" FontWeight="SemiBold" Margin="0,8,0,0" Style="{ThemeResource BodyTextBlockStyle}" Foreground="{ThemeResource PhoneAccentBrush}"/>
+                                </StackPanel>
+                            </Border>
+                        </ListView.Header>
+
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="19,8,19,16" HorizontalAlignment="Stretch">
+                                    <TextBlock Text="{Binding RepostHeader}" Visibility="{Binding RepostHeaderVisibility}" FontSize="12" Foreground="{ThemeResource PhoneMutedBrush}" Margin="0,0,0,4"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <Border Width="40" Height="40" VerticalAlignment="Top" Margin="0,0,12,0" Background="{ThemeResource PhoneBorderBrush}">
+                                            <Image Source="{Binding DisplayPoster.ProfilePictureUrl}" Width="40" Height="40" Stretch="UniformToFill"/>
+                                        </Border>
+
+                                        <StackPanel Grid.Column="1" HorizontalAlignment="Stretch">
+                                            <Grid Margin="0,0,0,4">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding DisplayPoster.Name}" FontWeight="Bold" Style="{ThemeResource BodyTextBlockStyle}" Foreground="{ThemeResource PhoneAccentBrush}"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding DisplayTime}" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource PhoneMutedBrush}"/>
+                                            </Grid>
+
+                                            <RichTextBlock helpers:HtmlHelper.Html="{Binding DisplayHtml}" FontSize="15" TextWrapping="Wrap"/>
+
+                                            <!-- Swipeable Images Carousel -->
+                                            <FlipView ItemsSource="{Binding DisplayImageUrls}" Visibility="{Binding DisplayImageVisibility}" Height="200" HorizontalAlignment="Stretch" Margin="0,8,0,0">
+                                                <FlipView.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Grid MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                                                            <ProgressRing x:Name="ImageProgress" IsActive="True" Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            <Image Source="{Binding}" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Top" ImageOpened="Image_ImageOpened" ImageFailed="Image_ImageFailed" Tapped="PostImage_Tapped"/>
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </FlipView.ItemTemplate>
+                                            </FlipView>
+
+                                            <Border BorderBrush="{StaticResource PhoneAccentBrush}" BorderThickness="2,0,0,0" Padding="6,0,0,0" Margin="0,4,0,4" Visibility="{Binding NormalRepostBorderVisibility}">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Repost.Poster.Name}" FontWeight="SemiBold" Style="{ThemeResource CaptionTextBlockStyle}"/>
+                                                    <RichTextBlock helpers:HtmlHelper.Html="{Binding Repost.Content}" FontSize="12" Foreground="{ThemeResource PhoneMutedBrush}" TextWrapping="Wrap"/>
+                                                </StackPanel>
+                                            </Border>
+
+                                            <!-- Stat Buttons Row -->
+                                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                                <!-- Love Button -->
+                                                <Button Click="LoveButton_Click" Width="80" Margin="0,0,12,0" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Path Data="M 12,5 C 10,3 6,3 4,5 C 2,7 2,11 4,13 L 12,21 L 20,13 C 22,11 22,7 20,5 C 18,3 14,3 12,5 Z" Stroke="{Binding DisplayLoveHeartStroke}" StrokeThickness="2" Fill="{Binding DisplayLoveHeartFill}" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                                        <TextBlock Text="{Binding DisplayLovesCount}" Style="{ThemeResource CaptionTextBlockStyle}" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </Button>
+
+                                                <!-- Comment Button -->
+                                                <Button Click="CommentButton_Click" Width="80" Margin="0,0,12,0" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Path Data="M 2,4 L 22,4 L 22,16 L 8,16 L 3,21 L 3,16 L 2,16 Z" Stroke="{ThemeResource PhoneMutedBrush}" StrokeThickness="2" Fill="Transparent" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                                        <TextBlock Text="{Binding DisplayCommentsCount}" Style="{ThemeResource CaptionTextBlockStyle}" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </Button>
+
+                                                <!-- Repost Button -->
+                                                <Button Click="RepostButton_Click" Width="80" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Path Data="M 4,12 L 4,7 C 4,5 5,4 7,4 L 17,4 M 13,1 L 18,4 L 13,7 M 16,8 L 16,13 C 16,15 15,16 13,16 L 3,16 M 7,13 L 2,16 L 7,19" Stroke="{ThemeResource PhoneMutedBrush}" StrokeThickness="2" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0">
+                                                            <Path.RenderTransform>
+                                                                <RotateTransform Angle="-30" CenterX="9" CenterY="9"/>
+                                                            </Path.RenderTransform>
+                                                        </Path>
+                                                        <TextBlock DataContext="{Binding}" Text="{Binding DisplayRepostsCount}" Style="{ThemeResource CaptionTextBlockStyle}" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </Button>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                        <ListView.Footer>
+                            <Button x:Name="LoadMoreProfilePostsButton" Content="load more..." Click="LoadMoreProfilePostsButton_Click" HorizontalAlignment="Center" Margin="0,12,0,12" Style="{ThemeResource ButtonSimpleStyle}" Visibility="Collapsed"/>
+                        </ListView.Footer>
+                    </ListView>
+                </Grid>
+            </PivotItem>
+
+            <!-- WALL TAB -->
+            <PivotItem Header="wall">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <Grid Grid.Row="0">
+                        <ProgressBar x:Name="WallProgressBar" VerticalAlignment="Top" IsIndeterminate="True" Visibility="Collapsed" Canvas.ZIndex="10"/>
+                        <ListView x:Name="WallCommentsListView" Margin="19,0,19,0" SelectionMode="None" IsItemClickEnabled="True" ItemClick="WallCommentsListView_ItemClick" HorizontalContentAlignment="Stretch">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="{Binding CommentMargin}" HorizontalAlignment="Stretch" Background="Transparent">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <Border Width="32" Height="32" VerticalAlignment="Top" Margin="0,0,10,0" Background="{ThemeResource PhoneBorderBrush}" Tapped="CommenterName_Tapped">
+                                            <Image Source="{Binding Poster.ProfilePictureUrl}" Width="32" Height="32" Stretch="UniformToFill"/>
+                                        </Border>
+
+                                        <StackPanel Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                                                <TextBlock Text="{Binding Poster.Name}" FontWeight="Bold" Style="{ThemeResource BodyTextBlockStyle}" Foreground="{ThemeResource PhoneAccentBrush}" Tapped="CommenterName_Tapped" Margin="0,0,8,0"/>
+                                                <TextBlock Text="{Binding FormattedTime}" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource PhoneMutedBrush}" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                            <RichTextBlock helpers:HtmlHelper.Html="{Binding Content}" FontSize="15" TextWrapping="Wrap"/>
+                                        </StackPanel>
+
+                                        <Button Grid.Column="2" Content="reply" Click="ReplyWallCommentButton_Click" Padding="12,0,12,0" MinHeight="44" MinWidth="64" FontSize="12" Style="{StaticResource ButtonSimpleStyle}" VerticalAlignment="Top" Margin="8,0,0,0"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                            <ListView.Footer>
+                                <Button x:Name="LoadMoreWallCommentsButton" Content="load more..." Click="LoadMoreWallCommentsButton_Click" HorizontalAlignment="Center" Margin="0,12,0,12" Style="{ThemeResource ButtonSimpleStyle}" Visibility="Collapsed"/>
+                            </ListView.Footer>
+                        </ListView>
+                    </Grid>
+
+                    <Border Grid.Row="1" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" BorderThickness="0,1,0,0" BorderBrush="{ThemeResource PhoneBorderBrush}" Padding="19,8,19,8">
                         <StackPanel>
-                            <Grid Height="120" Margin="0,0,0,12" Background="{ThemeResource PhoneBorderBrush}">
-                                <Image x:Name="BannerImage" Stretch="UniformToFill" Height="120"/>
-                            </Grid>
-
-                            <Grid Margin="0,0,0,12">
+                            <Grid x:Name="ReplyToIndicator" Visibility="Collapsed" Margin="0,0,0,6" Tapped="ReplyToIndicator_Tapped">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-
-                                <Border Width="64" Height="64" VerticalAlignment="Center" Margin="0,0,12,0" Background="{ThemeResource PhoneBorderBrush}">
-                                    <Image x:Name="ProfilePictureImage" Width="64" Height="64" Stretch="UniformToFill"/>
-                                </Border>
-
-                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                    <TextBlock x:Name="OnlineStatusTextBlock" Text="offline" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource PhoneMutedBrush}"/>
-                                    <TextBlock x:Name="DisplayNameTextBlock" Text="Display Name" FontWeight="Bold" Style="{ThemeResource SubheaderTextBlockStyle}"/>
-                                </StackPanel>
-
-                                <Button x:Name="FollowButton" Grid.Column="2" Content="follow" Click="FollowButton_Click" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="ReplyToTextBlock" Text="replying to @username" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource PhoneAccentBrush}" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="✕" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource PhoneMutedBrush}" VerticalAlignment="Center" Padding="4"/>
                             </Grid>
 
-                            <TextBlock x:Name="BioTextBlock" Text="User bio here..." TextWrapping="Wrap" Margin="0,0,0,16" Style="{ThemeResource BodyTextBlockStyle}"/>
-
-                            <Grid Margin="0,0,0,16">
+                            <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0" HorizontalAlignment="Center">
-                                    <TextBlock x:Name="PostsCountTextBlock" Text="0" FontWeight="Bold" HorizontalAlignment="Center" Style="{ThemeResource SubheaderTextBlockStyle}"/>
-                                    <TextBlock Text="posts" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource PhoneMutedBrush}"/>
-                                </StackPanel>
-                                <StackPanel Grid.Column="1" HorizontalAlignment="Center" Background="Transparent" Tapped="FollowersStat_Tapped">
-                                    <TextBlock x:Name="FollowersCountTextBlock" Text="0" FontWeight="Bold" HorizontalAlignment="Center" Style="{ThemeResource SubheaderTextBlockStyle}"/>
-                                    <TextBlock Text="followers" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource PhoneMutedBrush}"/>
-                                </StackPanel>
-                                <StackPanel Grid.Column="2" HorizontalAlignment="Center" Background="Transparent" Tapped="FollowingStat_Tapped">
-                                    <TextBlock x:Name="FollowingCountTextBlock" Text="0" FontWeight="Bold" HorizontalAlignment="Center" Style="{ThemeResource SubheaderTextBlockStyle}"/>
-                                    <TextBlock Text="following" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource PhoneMutedBrush}"/>
-                                </StackPanel>
+                                <TextBox x:Name="NewWallCommentTextBox" PlaceholderText="post to wall..." TextWrapping="Wrap" Margin="0,0,8,0" MaxLength="1000" VerticalAlignment="Center"/>
+                                <Button x:Name="SendWallCommentButton" Grid.Column="1" Content="send" Click="SendWallCommentButton_Click" VerticalAlignment="Center" Margin="0"/>
                             </Grid>
                         </StackPanel>
                     </Border>
-                    <TextBlock Text="recent posts" FontWeight="SemiBold" Margin="0,8,0,0" Style="{ThemeResource BodyTextBlockStyle}" Foreground="{ThemeResource PhoneAccentBrush}"/>
-                </StackPanel>
-            </ListView.Header>
+                </Grid>
+            </PivotItem>
 
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Margin="19,8,19,16" HorizontalAlignment="Stretch">
-                        <TextBlock Text="{Binding RepostHeader}" Visibility="{Binding RepostHeaderVisibility}" FontSize="12" Foreground="{ThemeResource PhoneMutedBrush}" Margin="0,0,0,4"/>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <Border Width="40" Height="40" VerticalAlignment="Top" Margin="0,0,12,0" Background="{ThemeResource PhoneBorderBrush}">
-                                <Image Source="{Binding DisplayPoster.ProfilePictureUrl}" Width="40" Height="40" Stretch="UniformToFill"/>
-                            </Border>
-
-                            <StackPanel Grid.Column="1" HorizontalAlignment="Stretch">
-                                <Grid Margin="0,0,0,4">
+            <!-- FOLLOWING TAB -->
+            <PivotItem Header="following">
+                <Grid>
+                    <ProgressBar x:Name="FollowingProgressBar" VerticalAlignment="Top" IsIndeterminate="True" Visibility="Collapsed" Canvas.ZIndex="10"/>
+                    <ListView x:Name="FollowingListView" Margin="19,0,19,0" SelectionMode="None" IsItemClickEnabled="True" ItemClick="UserListView_ItemClick" HorizontalContentAlignment="Stretch">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,8,0,8">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="{Binding DisplayPoster.Name}" FontWeight="Bold" Style="{ThemeResource BodyTextBlockStyle}" Foreground="{ThemeResource PhoneAccentBrush}"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding DisplayTime}" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource PhoneMutedBrush}"/>
-                                </Grid>
-
-                                <RichTextBlock helpers:HtmlHelper.Html="{Binding DisplayHtml}" FontSize="15" TextWrapping="Wrap"/>
-
-                                <!-- Image Display -->
-                                <Image Source="{Binding DisplayFirstImageUrl}" MaxHeight="200" Stretch="UniformToFill" HorizontalAlignment="Left" Margin="0,8,0,0" Visibility="{Binding DisplayImageVisibility}"/>
-
-                                <Border BorderBrush="{StaticResource PhoneAccentBrush}" BorderThickness="2,0,0,0" Padding="6,0,0,0" Margin="0,4,0,4" Visibility="{Binding NormalRepostBorderVisibility}">
-                                    <StackPanel>
-                                        <TextBlock Text="{Binding Repost.Poster.Name}" FontWeight="SemiBold" Style="{ThemeResource CaptionTextBlockStyle}"/>
-                                        <RichTextBlock helpers:HtmlHelper.Html="{Binding Repost.Content}" FontSize="12" Foreground="{ThemeResource PhoneMutedBrush}" TextWrapping="Wrap"/>
+                                    <Border Width="40" Height="40" VerticalAlignment="Center" Margin="0,0,12,0" Background="{ThemeResource PhoneBorderBrush}">
+                                        <Image Source="{Binding ProfilePictureUrl}" Width="40" Height="40" Stretch="UniformToFill"/>
+                                    </Border>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" Style="{ThemeResource BodyTextBlockStyle}"/>
+                                        <TextBlock Text="{Binding Bio}" MaxLines="1" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource PhoneMutedBrush}" TextWrapping="NoWrap"/>
                                     </StackPanel>
-                                </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                        <ListView.Footer>
+                            <Button x:Name="LoadMoreFollowingButton" Content="load more..." Click="LoadMoreFollowingButton_Click" HorizontalAlignment="Center" Margin="0,12,0,12" Style="{ThemeResource ButtonSimpleStyle}" Visibility="Collapsed"/>
+                        </ListView.Footer>
+                    </ListView>
+                </Grid>
+            </PivotItem>
 
-                                <!-- Stat Buttons Row -->
-                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                    <!-- Love Button -->
-                                    <Button Click="LoveButton_Click" Width="80" Margin="0,0,12,0" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <Path Data="M 12,5 C 10,3 6,3 4,5 C 2,7 2,11 4,13 L 12,21 L 20,13 C 22,11 22,7 20,5 C 18,3 14,3 12,5 Z" Stroke="{Binding DisplayLoveHeartStroke}" StrokeThickness="2" Fill="{Binding DisplayLoveHeartFill}" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                            <TextBlock Text="{Binding DisplayLovesCount}" Style="{ThemeResource CaptionTextBlockStyle}" VerticalAlignment="Center"/>
-                                        </StackPanel>
-                                    </Button>
+            <!-- FOLLOWERS TAB -->
+            <PivotItem Header="followers">
+                <Grid>
+                    <ProgressBar x:Name="FollowersProgressBar" VerticalAlignment="Top" IsIndeterminate="True" Visibility="Collapsed" Canvas.ZIndex="10"/>
+                    <ListView x:Name="FollowersListView" Margin="19,0,19,0" SelectionMode="None" IsItemClickEnabled="True" ItemClick="UserListView_ItemClick" HorizontalContentAlignment="Stretch">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,8,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Width="40" Height="40" VerticalAlignment="Center" Margin="0,0,12,0" Background="{ThemeResource PhoneBorderBrush}">
+                                        <Image Source="{Binding ProfilePictureUrl}" Width="40" Height="40" Stretch="UniformToFill"/>
+                                    </Border>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" Style="{ThemeResource BodyTextBlockStyle}"/>
+                                        <TextBlock Text="{Binding Bio}" MaxLines="1" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource PhoneMutedBrush}" TextWrapping="NoWrap"/>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                        <ListView.Footer>
+                            <Button x:Name="LoadMoreFollowersButton" Content="load more..." Click="LoadMoreFollowersButton_Click" HorizontalAlignment="Center" Margin="0,12,0,12" Style="{ThemeResource ButtonSimpleStyle}" Visibility="Collapsed"/>
+                        </ListView.Footer>
+                    </ListView>
+                </Grid>
+            </PivotItem>
+        </Pivot>
 
-                                    <!-- Comment Button -->
-                                    <Button Click="CommentButton_Click" Width="80" Margin="0,0,12,0" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <Path Data="M 2,4 L 22,4 L 22,16 L 8,16 L 3,21 L 3,16 L 2,16 Z" Stroke="{ThemeResource PhoneMutedBrush}" StrokeThickness="2" Fill="Transparent" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                            <TextBlock Text="{Binding DisplayCommentsCount}" Style="{ThemeResource CaptionTextBlockStyle}" VerticalAlignment="Center"/>
-                                        </StackPanel>
-                                    </Button>
+        <!-- Fullscreen Image Preview Overlay -->
+        <Grid x:Name="FullscreenImageOverlay" Grid.RowSpan="2" Background="#F2000000" Visibility="Collapsed" Canvas.ZIndex="1000">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-                                    <!-- Repost Button -->
-                                    <Button Click="RepostButton_Click" Width="80" Padding="0" MinHeight="36" Style="{StaticResource ButtonSimpleStyle}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <Path Data="M 4,12 L 4,7 C 4,5 5,4 7,4 L 17,4 M 13,1 L 18,4 L 13,7 M 16,8 L 16,13 C 16,15 15,16 13,16 L 3,16 M 7,13 L 2,16 L 7,19" Stroke="{ThemeResource PhoneMutedBrush}" StrokeThickness="2" Width="18" Height="18" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,6,0">
-                                                <Path.RenderTransform>
-                                                    <RotateTransform Angle="-30" CenterX="9" CenterY="9"/>
-                                                </Path.RenderTransform>
-                                            </Path>
-                                            <TextBlock Text="{Binding DisplayRepostsCount}" Style="{ThemeResource CaptionTextBlockStyle}" VerticalAlignment="Center"/>
-                                        </StackPanel>
-                                    </Button>
-                                </StackPanel>
-                            </StackPanel>
-                        </Grid>
-                    </StackPanel>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-            <ListView.Footer>
-                <Button x:Name="LoadMoreProfilePostsButton" Content="load more..." Click="LoadMoreProfilePostsButton_Click" HorizontalAlignment="Center" Margin="0,12,0,12" Style="{ThemeResource ButtonSimpleStyle}" Visibility="Collapsed"/>
-            </ListView.Footer>
-        </ListView>
+            <ScrollViewer ZoomMode="Enabled" MinZoomFactor="1" MaxZoomFactor="5" HorizontalScrollMode="Enabled" VerticalScrollMode="Enabled" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <Image x:Name="FullscreenImage" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </ScrollViewer>
+
+            <Grid Grid.Row="1" Margin="24,0,24,24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button Content="download" Click="DownloadFullscreenImage_Click" HorizontalAlignment="Stretch" Margin="0,0,6,0"/>
+                <Button Content="close" Click="CloseFullscreenImage_Click" Grid.Column="1" HorizontalAlignment="Stretch" Margin="6,0,0,0"/>
+            </Grid>
+        </Grid>
     </Grid>
 </Page>

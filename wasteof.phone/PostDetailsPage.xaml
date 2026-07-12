@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:wasteof.phone"
     xmlns:models="using:wasteof.phone.Models"
+    xmlns:helpers="using:wasteof.phone.Helpers"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
@@ -50,7 +51,17 @@
 
                             <RichTextBlock x:Name="PostContentTextBlock" FontSize="16" TextWrapping="Wrap" Margin="0,0,0,12"/>
 
-                            <Image x:Name="PostImage" MaxHeight="400" Stretch="Uniform" HorizontalAlignment="Left" Margin="0,0,0,12" Visibility="Collapsed"/>
+                            <!-- Swipeable Images Carousel -->
+                            <FlipView x:Name="PostImagesFlipView" Visibility="Collapsed" Height="400" HorizontalAlignment="Stretch" Margin="0,0,0,12">
+                                <FlipView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid MaxHeight="400" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                                            <ProgressRing x:Name="ImageProgress" IsActive="True" Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            <Image Source="{Binding}" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Top" ImageOpened="Image_ImageOpened" ImageFailed="Image_ImageFailed" Tapped="PostImage_Tapped"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </FlipView.ItemTemplate>
+                            </FlipView>
 
                             <Border x:Name="RepostBorder" BorderBrush="{ThemeResource PhoneAccentBrush}" BorderThickness="3,0,0,0" Padding="8,0,0,0" Margin="0,0,0,12" Visibility="Collapsed">
                                 <StackPanel>
@@ -76,6 +87,10 @@
                                         </Path>
                                         <TextBlock x:Name="RepostCountTextBlock" Text="repost" Style="{ThemeResource BodyTextBlockStyle}" VerticalAlignment="Center"/>
                                     </StackPanel>
+                                </Button>
+
+                                <Button x:Name="EditButton" Click="EditButton_Click" Visibility="Collapsed" Padding="16,8,16,8" MinHeight="44" Style="{StaticResource ButtonSimpleStyle}" Margin="0,0,12,0">
+                                    <TextBlock Text="edit" Style="{ThemeResource BodyTextBlockStyle}" VerticalAlignment="Center"/>
                                 </Button>
 
                                 <Button x:Name="DeleteButton" Click="DeleteButton_Click" Visibility="Collapsed" Foreground="Red" Padding="16,8,16,8" MinHeight="44" Style="{StaticResource ButtonSimpleStyle}">
@@ -107,7 +122,8 @@
                                 <TextBlock Text="{Binding Poster.Name}" FontWeight="Bold" Style="{ThemeResource BodyTextBlockStyle}" Foreground="{ThemeResource PhoneAccentBrush}" Tapped="CommenterName_Tapped" Margin="0,0,8,0"/>
                                 <TextBlock Text="{Binding FormattedTime}" Style="{ThemeResource CaptionTextBlockStyle}" Foreground="{ThemeResource PhoneMutedBrush}" VerticalAlignment="Center"/>
                             </StackPanel>
-                            <TextBlock Text="{Binding CleanContent}" TextWrapping="Wrap" Style="{ThemeResource BodyTextBlockStyle}"/>
+                            <!-- Rich Text Comment Content -->
+                            <RichTextBlock helpers:HtmlHelper.Html="{Binding Content}" FontSize="15" TextWrapping="Wrap"/>
                         </StackPanel>
 
                         <Button Grid.Column="2" Content="reply" Click="ReplyCommentButton_Click" Padding="12,0,12,0" MinHeight="44" MinWidth="64" FontSize="12" Style="{StaticResource ButtonSimpleStyle}" VerticalAlignment="Top" Margin="8,0,0,0"/>
@@ -137,5 +153,26 @@
                 </Grid>
             </StackPanel>
         </Border>
+
+        <!-- Fullscreen Image Preview Overlay -->
+        <Grid x:Name="FullscreenImageOverlay" Grid.RowSpan="3" Background="#F2000000" Visibility="Collapsed" Canvas.ZIndex="1000">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <ScrollViewer ZoomMode="Enabled" MinZoomFactor="1" MaxZoomFactor="5" HorizontalScrollMode="Enabled" VerticalScrollMode="Enabled" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <Image x:Name="FullscreenImage" Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </ScrollViewer>
+
+            <Grid Grid.Row="1" Margin="24,0,24,24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button Content="download" Click="DownloadFullscreenImage_Click" HorizontalAlignment="Stretch" Margin="0,0,6,0"/>
+                <Button Content="close" Click="CloseFullscreenImage_Click" Grid.Column="1" HorizontalAlignment="Stretch" Margin="6,0,0,0"/>
+            </Grid>
+        </Grid>
     </Grid>
 </Page>
