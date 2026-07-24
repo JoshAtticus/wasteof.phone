@@ -20,6 +20,9 @@ namespace wasteof.phone
         private System.Collections.ObjectModel.ObservableCollection<Comment> _comments = new System.Collections.ObjectModel.ObservableCollection<Comment>();
         private string _replyParentId = null;
         private bool _isLoveStatusLoaded = false;
+        private int _commentsPage = 1;
+        private bool _commentsHasMore = true;
+        private bool _isLoadingComments = false;
 
         public PostDetailsPage()
         {
@@ -53,7 +56,7 @@ namespace wasteof.phone
                 }
                 _isLoveStatusLoaded = true;
                 UpdateLoveButtonState();
-                await LoadCommentsAsync();
+                await LoadCommentsAsync(true);
             }
         }
 
@@ -83,7 +86,7 @@ namespace wasteof.phone
             }
             _isLoveStatusLoaded = true;
             UpdateLoveButtonState();
-            await LoadCommentsAsync();
+            await LoadCommentsAsync(true);
         }
 
         private void DisplayPost()
@@ -100,15 +103,25 @@ namespace wasteof.phone
             Helpers.HtmlHelper.SetHtml(PostContentTextBlock, _post.Content);
 
             var urls = _post.ImageUrls;
-            if (urls.Count > 0)
+            if (urls != null && urls.Count == 1)
+            {
+                PostSingleImage.Source = new BitmapImage(new Uri(urls[0]));
+                PostSingleImageGrid.Visibility = Visibility.Visible;
+                PostImagesGrid.Visibility = Visibility.Collapsed;
+            }
+            else if (urls != null && urls.Count > 1)
             {
                 PostImagesFlipView.ItemsSource = urls;
-                PostImagesFlipView.Visibility = Visibility.Visible;
+                PostImagesGrid.Visibility = Visibility.Visible;
+                PostSingleImageGrid.Visibility = Visibility.Collapsed;
+                PostImageIndicatorTextBlock.Text = $"1/{urls.Count}";
             }
             else
             {
-                PostImagesFlipView.Visibility = Visibility.Collapsed;
+                PostSingleImageGrid.Visibility = Visibility.Collapsed;
+                PostImagesGrid.Visibility = Visibility.Collapsed;
             }
+
 
             if (_post.Repost != null)
             {
@@ -146,22 +159,42 @@ namespace wasteof.phone
             RepostCountTextBlock.Text = _post.RepostsCount.ToString();
         }
 
-        private async System.Threading.Tasks.Task LoadCommentsAsync()
+        private async System.Threading.Tasks.Task LoadCommentsAsync(bool refresh = false)
         {
-            var response = await ApiService.Instance.GetCommentsAsync(_postId);
-            _comments.Clear();
-            CommentsListView.ItemsSource = _comments;
+            if (_isLoadingComments) return;
+            _isLoadingComments = true;
+
+            if (refresh)
+            {
+                _commentsPage = 1;
+                _commentsHasMore = true;
+                _comments.Clear();
+                CommentsListView.ItemsSource = _comments;
+            }
+
+            var response = await ApiService.Instance.GetCommentsAsync(_postId, _commentsPage);
 
             if (response != null && response.Comments != null)
             {
                 foreach (var comment in response.Comments)
                 {
-                    comment.Level = 0;
-                    _comments.Add(comment);
-
-                    var task = FetchAndAppendRepliesBackgroundAsync(comment, 1);
+                    if (!System.Linq.Enumerable.Any(_comments, c => c.Id == comment.Id))
+                    {
+                        comment.Level = 0;
+                        _comments.Add(comment);
+                        var task = FetchAndAppendRepliesBackgroundAsync(comment, 1);
+                    }
                 }
+
+                _commentsHasMore = response.Comments.Count >= 20;
             }
+
+            else
+            {
+                _commentsHasMore = false;
+            }
+
+            _isLoadingComments = false;
         }
 
         private async System.Threading.Tasks.Task FetchAndAppendRepliesBackgroundAsync(Comment parentComment, int level)
@@ -183,19 +216,23 @@ namespace wasteof.phone
                             {
                                 foreach (var reply in response.Comments)
                                 {
-                                    reply.Level = level;
-
-                                    int parentIndex = _comments.IndexOf(parentComment);
-                                    if (parentIndex >= 0)
+                                    if (!System.Linq.Enumerable.Any(_comments, c => c.Id == reply.Id))
                                     {
-                                        int targetIndex = parentIndex + insertOffset;
-                                        if (targetIndex > _comments.Count) targetIndex = _comments.Count;
-                                        _comments.Insert(targetIndex, reply);
-                                        insertOffset++;
-                                    }
+                                        reply.Level = level;
 
-                                    var task = FetchAndAppendRepliesBackgroundAsync(reply, level + 1);
+                                        int parentIndex = _comments.IndexOf(parentComment);
+                                        if (parentIndex >= 0)
+                                        {
+                                            int targetIndex = parentIndex + insertOffset;
+                                            if (targetIndex > _comments.Count) targetIndex = _comments.Count;
+                                            _comments.Insert(targetIndex, reply);
+                                            insertOffset++;
+                                        }
+
+                                        var task = FetchAndAppendRepliesBackgroundAsync(reply, level + 1);
+                                    }
                                 }
+
                             });
 
                             hasMore = response.Comments.Count >= 20;
@@ -288,8 +325,9 @@ namespace wasteof.phone
             {
                 NewCommentTextBox.Text = string.Empty;
                 ClearReplyParent();
-                await LoadCommentsAsync();
+                await RefreshPostAndCommentsAsync();
             }
+
             else
             {
                 var dialog = new MessageDialog("Failed to post comment.");
@@ -473,5 +511,58 @@ namespace wasteof.phone
                 }
             }
         }
+
+        private ScrollViewer GetScrollViewer(DependencyObject depObj)
+        {
+            if (depObj is ScrollViewer) return depObj as ScrollViewer;
+
+            for (int i = 0; i < Windows.UI.Xaml.Media.VisualTreeHelper.GetChildrenCount(depObj); i++)
+            {
+                var child = Windows.UI.Xaml.Media.VisualTreeHelper.GetChild(depObj, i);
+                var result = GetScrollViewer(child);
+                if (result != null) return result;
+            }
+            return null;
+        }
+
+        private void ListView_Loaded(object sender, RoutedEventArgs e)
+        {
+            var listView = sender as ListView;
+            if (listView != null)
+            {
+                var scrollViewer = GetScrollViewer(listView);
+                if (scrollViewer != null)
+                {
+                    scrollViewer.ViewChanged += async (s, args) =>
+                    {
+                        if (scrollViewer.VerticalOffset >= scrollViewer.ScrollableHeight - 200)
+                        {
+                            await TriggerLoadMoreAsync(listView);
+                        }
+                    };
+                }
+            }
+        }
+
+        private async System.Threading.Tasks.Task TriggerLoadMoreAsync(ListView listView)
+        {
+            if (listView == CommentsListView)
+            {
+                if (_commentsHasMore && !_isLoadingComments)
+                {
+                    _commentsPage++;
+                    await LoadCommentsAsync();
+                }
+            }
+        }
+
+        private void PostImagesFlipView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_post != null && _post.ImageUrls != null && _post.ImageUrls.Count > 1)
+            {
+                PostImageIndicatorTextBlock.Text = $"{PostImagesFlipView.SelectedIndex + 1}/{_post.ImageUrls.Count}";
+            }
+        }
     }
 }
+

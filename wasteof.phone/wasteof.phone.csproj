@@ -129,6 +129,7 @@
     <Compile Include="NullToVisibilityConverter.cs" />
     <Compile Include="Models\Models.cs" />
     <Compile Include="Services\ApiService.cs" />
+    <Compile Include="Services\SocketService.cs" />
     <Compile Include="Helpers\HtmlHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

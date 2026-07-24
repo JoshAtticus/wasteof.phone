@@ -257,6 +257,48 @@ namespace wasteof.phone.Models
         public Visibility DisplayImageVisibility => IsEmptyRepost ? Repost.ImageVisibility : ImageVisibility;
 
         [JsonIgnore]
+        public Visibility DisplaySingleImageVisibility
+        {
+            get
+            {
+                var urls = DisplayImageUrls;
+                if (urls != null && urls.Count == 1)
+                {
+                    return Visibility.Visible;
+                }
+                return Visibility.Collapsed;
+            }
+        }
+
+        [JsonIgnore]
+        public Visibility DisplayCarouselVisibility
+        {
+            get
+            {
+                var urls = DisplayImageUrls;
+                if (urls != null && urls.Count > 1)
+                {
+                    return Visibility.Visible;
+                }
+                return Visibility.Collapsed;
+            }
+        }
+
+        [JsonIgnore]
+        public string DisplayImageCountIndicator
+        {
+            get
+            {
+                var urls = DisplayImageUrls;
+                if (urls != null && urls.Count > 1)
+                {
+                    return $"1/{urls.Count}";
+                }
+                return string.Empty;
+            }
+        }
+
+        [JsonIgnore]
         public string RepostHeader => IsEmptyRepost ? $"@{Poster.Name} reposted" : null;
 
         [JsonIgnore]

@@ -30,6 +30,10 @@ namespace wasteof.phone
         private bool _isWallLoaded = false;
 
         // Following & Followers state
+        private int _followingPage = 1;
+        private bool _followingHasMore = true;
+        private int _followersPage = 1;
+        private bool _followersHasMore = true;
         private ObservableCollection<User> _followingList = new ObservableCollection<User>();
         private ObservableCollection<User> _followersList = new ObservableCollection<User>();
         private bool _isFollowingLoaded = false;
@@ -332,11 +336,20 @@ namespace wasteof.phone
         // --- FOLLOWING TAB LOGIC ---
         private async Task RefreshFollowingAsync()
         {
-            FollowingProgressBar.Visibility = Visibility.Visible;
+            _followingPage = 1;
             _followingList.Clear();
+            _followingHasMore = true;
             FollowingListView.ItemsSource = _followingList;
+            await LoadFollowingAsync();
+            _isFollowingLoaded = true;
+        }
 
-            var list = await ApiService.Instance.GetFollowingAsync(_username);
+        private async Task LoadFollowingAsync()
+        {
+            FollowingProgressBar.Visibility = Visibility.Visible;
+            LoadMoreFollowingButton.IsEnabled = false;
+
+            var list = await ApiService.Instance.GetFollowingAsync(_username, _followingPage);
             FollowingProgressBar.Visibility = Visibility.Collapsed;
 
             if (list != null)
@@ -345,23 +358,45 @@ namespace wasteof.phone
                 {
                     _followingList.Add(user);
                 }
+
+                _followingHasMore = list.Count >= 20;
+                LoadMoreFollowingButton.Visibility = _followingHasMore ? Visibility.Visible : Visibility.Collapsed;
             }
-            _isFollowingLoaded = true;
+            else
+            {
+                _followingHasMore = false;
+                LoadMoreFollowingButton.Visibility = Visibility.Collapsed;
+            }
+
+            LoadMoreFollowingButton.IsEnabled = true;
         }
 
-        private void LoadMoreFollowingButton_Click(object sender, RoutedEventArgs e)
+        private async void LoadMoreFollowingButton_Click(object sender, RoutedEventArgs e)
         {
-            // The API doesn't support pagination, loads all at once.
+            if (_followingHasMore)
+            {
+                _followingPage++;
+                await LoadFollowingAsync();
+            }
         }
 
         // --- FOLLOWERS TAB LOGIC ---
         private async Task RefreshFollowersAsync()
         {
-            FollowersProgressBar.Visibility = Visibility.Visible;
+            _followersPage = 1;
             _followersList.Clear();
+            _followersHasMore = true;
             FollowersListView.ItemsSource = _followersList;
+            await LoadFollowersAsync();
+            _isFollowersLoaded = true;
+        }
 
-            var list = await ApiService.Instance.GetFollowersAsync(_username);
+        private async Task LoadFollowersAsync()
+        {
+            FollowersProgressBar.Visibility = Visibility.Visible;
+            LoadMoreFollowersButton.IsEnabled = false;
+
+            var list = await ApiService.Instance.GetFollowersAsync(_username, _followersPage);
             FollowersProgressBar.Visibility = Visibility.Collapsed;
 
             if (list != null)
@@ -370,13 +405,26 @@ namespace wasteof.phone
                 {
                     _followersList.Add(user);
                 }
+
+                _followersHasMore = list.Count >= 20;
+                LoadMoreFollowersButton.Visibility = _followersHasMore ? Visibility.Visible : Visibility.Collapsed;
             }
-            _isFollowersLoaded = true;
+            else
+            {
+                _followersHasMore = false;
+                LoadMoreFollowersButton.Visibility = Visibility.Collapsed;
+            }
+
+            LoadMoreFollowersButton.IsEnabled = true;
         }
 
-        private void LoadMoreFollowersButton_Click(object sender, RoutedEventArgs e)
+        private async void LoadMoreFollowersButton_Click(object sender, RoutedEventArgs e)
         {
-            // The API doesn't support pagination, loads all at once.
+            if (_followersHasMore)
+            {
+                _followersPage++;
+                await LoadFollowersAsync();
+            }
         }
 
         private void UserListView_ItemClick(object sender, ItemClickEventArgs e)
@@ -677,5 +725,93 @@ namespace wasteof.phone
                 }
             }
         }
+
+        private ScrollViewer GetScrollViewer(DependencyObject depObj)
+        {
+            if (depObj is ScrollViewer) return depObj as ScrollViewer;
+
+            for (int i = 0; i < Windows.UI.Xaml.Media.VisualTreeHelper.GetChildrenCount(depObj); i++)
+            {
+                var child = Windows.UI.Xaml.Media.VisualTreeHelper.GetChild(depObj, i);
+                var result = GetScrollViewer(child);
+                if (result != null) return result;
+            }
+            return null;
+        }
+
+        private void ListView_Loaded(object sender, RoutedEventArgs e)
+        {
+            var listView = sender as ListView;
+            if (listView != null)
+            {
+                var scrollViewer = GetScrollViewer(listView);
+                if (scrollViewer != null)
+                {
+                    scrollViewer.ViewChanged += async (s, args) =>
+                    {
+                        if (scrollViewer.VerticalOffset >= scrollViewer.ScrollableHeight - 200)
+                        {
+                            await TriggerLoadMoreAsync(listView);
+                        }
+                    };
+                }
+            }
+        }
+
+        private async System.Threading.Tasks.Task TriggerLoadMoreAsync(ListView listView)
+        {
+            if (listView == ProfilePostsListView)
+            {
+                if (_profilePostsHasMore && LoadMoreProfilePostsButton.IsEnabled)
+                {
+                    _profilePostsPage++;
+                    await LoadUserPostsAsync();
+                }
+            }
+            else if (listView == WallCommentsListView)
+            {
+                if (_wallHasMore && LoadMoreWallCommentsButton.IsEnabled)
+                {
+                    _wallPage++;
+                    await LoadWallCommentsAsync();
+                }
+            }
+            else if (listView == FollowingListView)
+            {
+                if (_followingHasMore && LoadMoreFollowingButton.IsEnabled)
+                {
+                    _followingPage++;
+                    await LoadFollowingAsync();
+                }
+            }
+            else if (listView == FollowersListView)
+            {
+                if (_followersHasMore && LoadMoreFollowersButton.IsEnabled)
+                {
+                    _followersPage++;
+                    await LoadFollowersAsync();
+                }
+            }
+        }
+
+        private void FlipView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var flipView = sender as FlipView;
+            if (flipView != null)
+            {
+                var parentGrid = flipView.Parent as Grid;
+                if (parentGrid != null)
+                {
+                    var indicatorText = parentGrid.FindName("ImageIndicatorTextBlock") as TextBlock;
+                    var list = flipView.ItemsSource as System.Collections.IList;
+                    if (indicatorText != null && list != null && list.Count > 0)
+                    {
+                        indicatorText.Text = $"{flipView.SelectedIndex + 1}/{list.Count}";
+                    }
+                }
+            }
+        }
+
     }
 }
+

@@ -41,6 +41,27 @@ namespace wasteof.phone
             if (ApiService.Instance.IsLoggedIn)
             {
                 RefreshActiveTab();
+                SocketService.Instance.UnreadCountChanged -= SocketService_UnreadCountChanged;
+                SocketService.Instance.UnreadCountChanged += SocketService_UnreadCountChanged;
+                SocketService.Instance.Connect();
+            }
+        }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            base.OnNavigatedFrom(e);
+            SocketService.Instance.UnreadCountChanged -= SocketService_UnreadCountChanged;
+        }
+
+        private void SocketService_UnreadCountChanged(int unreadCount)
+        {
+            if (unreadCount > 0)
+            {
+                NotificationsButton.Label = "messages (" + unreadCount + ")";
+            }
+            else
+            {
+                NotificationsButton.Label = "messages";
             }
         }
 
@@ -311,6 +332,7 @@ namespace wasteof.phone
 
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
+            SocketService.Instance.Disconnect();
             ApiService.Instance.ClearSession();
             Frame.Navigate(typeof(LoginPage));
         }
@@ -390,6 +412,7 @@ namespace wasteof.phone
                 
                 item.Click += (s, ev) =>
                 {
+                    SocketService.Instance.Disconnect();
                     ApiService.Instance.SwitchAccount(acc.Username);
                     Frame.Navigate(typeof(MainPage));
                 };
@@ -416,6 +439,7 @@ namespace wasteof.phone
                     var remItem = new MenuFlyoutItem { Text = "remove: " + acc.Username };
                     remItem.Click += (s, ev) =>
                     {
+                        SocketService.Instance.Disconnect();
                         ApiService.Instance.RemoveAccount(acc.Username);
                         if (!ApiService.Instance.IsLoggedIn)
                         {
@@ -540,5 +564,85 @@ namespace wasteof.phone
                 }
             }
         }
+
+        private ScrollViewer GetScrollViewer(DependencyObject depObj)
+        {
+            if (depObj is ScrollViewer) return depObj as ScrollViewer;
+
+            for (int i = 0; i < Windows.UI.Xaml.Media.VisualTreeHelper.GetChildrenCount(depObj); i++)
+            {
+                var child = Windows.UI.Xaml.Media.VisualTreeHelper.GetChild(depObj, i);
+                var result = GetScrollViewer(child);
+                if (result != null) return result;
+            }
+            return null;
+        }
+
+        private void ListView_Loaded(object sender, RoutedEventArgs e)
+        {
+            var listView = sender as ListView;
+            if (listView != null)
+            {
+                var scrollViewer = GetScrollViewer(listView);
+                if (scrollViewer != null)
+                {
+                    scrollViewer.ViewChanged += (s, args) =>
+                    {
+                        if (scrollViewer.VerticalOffset >= scrollViewer.ScrollableHeight - 200)
+                        {
+                            TriggerLoadMore(listView);
+                        }
+                    };
+                }
+            }
+        }
+
+        private void TriggerLoadMore(ListView listView)
+        {
+            if (listView == FeedListView)
+            {
+                if (_feedHasMore && LoadMoreFeedButton.IsEnabled)
+                {
+                    _feedPage++;
+                    LoadFeedAsync();
+                }
+            }
+            else if (listView == ExploreListView)
+            {
+                if (_exploreHasMore && LoadMoreExploreButton.IsEnabled)
+                {
+                    _explorePage++;
+                    LoadExploreAsync();
+                }
+            }
+            else if (listView == MyPostsListView)
+            {
+                if (_myPostsHasMore && LoadMoreMyPostsButton.IsEnabled)
+                {
+                    _myPostsPage++;
+                    LoadAccountAsync();
+                }
+            }
+        }
+
+        private void FlipView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var flipView = sender as FlipView;
+            if (flipView != null)
+            {
+                var parentGrid = flipView.Parent as Grid;
+                if (parentGrid != null)
+                {
+                    var indicatorText = parentGrid.FindName("ImageIndicatorTextBlock") as TextBlock;
+                    var list = flipView.ItemsSource as System.Collections.IList;
+                    if (indicatorText != null && list != null && list.Count > 0)
+                    {
+                        indicatorText.Text = $"{flipView.SelectedIndex + 1}/{list.Count}";
+                    }
+                }
+            }
+        }
+
     }
 }
+

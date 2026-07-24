@@ -17,7 +17,7 @@
                 <Grid>
                     <ProgressBar x:Name="ProfileProgressBar" VerticalAlignment="Top" IsIndeterminate="True" Visibility="Collapsed" Canvas.ZIndex="10"/>
                     
-                    <ListView x:Name="ProfilePostsListView" SelectionMode="None" IsItemClickEnabled="True" ItemClick="ProfilePostsListView_ItemClick" HorizontalContentAlignment="Stretch">
+                    <ListView x:Name="ProfilePostsListView" SelectionMode="None" IsItemClickEnabled="True" ItemClick="ProfilePostsListView_ItemClick" HorizontalContentAlignment="Stretch" Loaded="ListView_Loaded">
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -100,17 +100,29 @@
 
                                             <RichTextBlock helpers:HtmlHelper.Html="{Binding DisplayHtml}" FontSize="15" TextWrapping="Wrap"/>
 
+                                            <!-- Single Image Display -->
+                                            <Grid MaxHeight="200" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,8,0,0" Visibility="{Binding DisplaySingleImageVisibility}">
+                                                <ProgressRing x:Name="ImageProgress" IsActive="True" Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <Image Source="{Binding DisplayFirstImageUrl}" Stretch="Uniform" HorizontalAlignment="Left" VerticalAlignment="Top" ImageOpened="Image_ImageOpened" ImageFailed="Image_ImageFailed" Tapped="PostImage_Tapped"/>
+                                            </Grid>
+
                                             <!-- Swipeable Images Carousel -->
-                                            <FlipView ItemsSource="{Binding DisplayImageUrls}" Visibility="{Binding DisplayImageVisibility}" Height="200" HorizontalAlignment="Stretch" Margin="0,8,0,0">
-                                                <FlipView.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <Grid MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top">
-                                                            <ProgressRing x:Name="ImageProgress" IsActive="True" Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                            <Image Source="{Binding}" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Top" ImageOpened="Image_ImageOpened" ImageFailed="Image_ImageFailed" Tapped="PostImage_Tapped"/>
-                                                        </Grid>
-                                                    </DataTemplate>
-                                                </FlipView.ItemTemplate>
-                                            </FlipView>
+                                            <Grid Visibility="{Binding DisplayCarouselVisibility}" Margin="0,8,0,0">
+                                                <FlipView ItemsSource="{Binding DisplayImageUrls}" Height="200" HorizontalAlignment="Stretch" SelectionChanged="FlipView_SelectionChanged">
+                                                    <FlipView.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Grid MaxHeight="200" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                                                <ProgressRing x:Name="ImageProgress" IsActive="True" Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                <Image Source="{Binding}" Stretch="Uniform" HorizontalAlignment="Left" VerticalAlignment="Top" ImageOpened="Image_ImageOpened" ImageFailed="Image_ImageFailed" Tapped="PostImage_Tapped"/>
+                                                            </Grid>
+                                                        </DataTemplate>
+                                                    </FlipView.ItemTemplate>
+                                                </FlipView>
+                                                <Border HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8" Background="#B0000000" CornerRadius="4" Padding="6,2,6,2" IsHitTestVisible="False">
+                                                    <TextBlock x:Name="ImageIndicatorTextBlock" Text="{Binding DisplayImageCountIndicator}" Foreground="White" FontSize="11" FontWeight="SemiBold"/>
+                                                </Border>
+                                            </Grid>
+
 
                                             <Border BorderBrush="{StaticResource PhoneAccentBrush}" BorderThickness="2,0,0,0" Padding="6,0,0,0" Margin="0,4,0,4" Visibility="{Binding NormalRepostBorderVisibility}">
                                                 <StackPanel>
@@ -171,7 +183,7 @@
                     
                     <Grid Grid.Row="0">
                         <ProgressBar x:Name="WallProgressBar" VerticalAlignment="Top" IsIndeterminate="True" Visibility="Collapsed" Canvas.ZIndex="10"/>
-                        <ListView x:Name="WallCommentsListView" Margin="19,0,19,0" SelectionMode="None" IsItemClickEnabled="True" ItemClick="WallCommentsListView_ItemClick" HorizontalContentAlignment="Stretch">
+                        <ListView x:Name="WallCommentsListView" Margin="19,0,19,0" SelectionMode="None" IsItemClickEnabled="True" ItemClick="WallCommentsListView_ItemClick" HorizontalContentAlignment="Stretch" Loaded="ListView_Loaded">
                             <ListView.ItemContainerStyle>
                                 <Style TargetType="ListViewItem">
                                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -236,7 +248,7 @@
             <PivotItem Header="following">
                 <Grid>
                     <ProgressBar x:Name="FollowingProgressBar" VerticalAlignment="Top" IsIndeterminate="True" Visibility="Collapsed" Canvas.ZIndex="10"/>
-                    <ListView x:Name="FollowingListView" Margin="19,0,19,0" SelectionMode="None" IsItemClickEnabled="True" ItemClick="UserListView_ItemClick" HorizontalContentAlignment="Stretch">
+                    <ListView x:Name="FollowingListView" Margin="19,0,19,0" SelectionMode="None" IsItemClickEnabled="True" ItemClick="UserListView_ItemClick" HorizontalContentAlignment="Stretch" Loaded="ListView_Loaded">
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -270,7 +282,7 @@
             <PivotItem Header="followers">
                 <Grid>
                     <ProgressBar x:Name="FollowersProgressBar" VerticalAlignment="Top" IsIndeterminate="True" Visibility="Collapsed" Canvas.ZIndex="10"/>
-                    <ListView x:Name="FollowersListView" Margin="19,0,19,0" SelectionMode="None" IsItemClickEnabled="True" ItemClick="UserListView_ItemClick" HorizontalContentAlignment="Stretch">
+                    <ListView x:Name="FollowersListView" Margin="19,0,19,0" SelectionMode="None" IsItemClickEnabled="True" ItemClick="UserListView_ItemClick" HorizontalContentAlignment="Stretch" Loaded="ListView_Loaded">
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>

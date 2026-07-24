@@ -499,11 +499,11 @@ namespace wasteof.phone.Services
             return false;
         }
 
-        public async Task<CommentResponse> GetCommentsAsync(string postId)
+        public async Task<CommentResponse> GetCommentsAsync(string postId, int page = 1)
         {
             try
             {
-                var response = await _httpClient.GetAsync($"posts/{postId}/comments");
+                var response = await _httpClient.GetAsync($"posts/{postId}/comments?page={page}");
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -548,11 +548,11 @@ namespace wasteof.phone.Services
             return null;
         }
 
-        public async Task<List<User>> GetFollowersAsync(string username)
+        public async Task<List<User>> GetFollowersAsync(string username, int page = 1)
         {
             try
             {
-                var response = await _httpClient.GetAsync($"users/{username.ToLowerInvariant()}/followers");
+                var response = await _httpClient.GetAsync($"users/{username.ToLowerInvariant()}/followers?page={page}");
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -564,11 +564,11 @@ namespace wasteof.phone.Services
             return null;
         }
 
-        public async Task<List<User>> GetFollowingAsync(string username)
+        public async Task<List<User>> GetFollowingAsync(string username, int page = 1)
         {
             try
             {
-                var response = await _httpClient.GetAsync($"users/{username.ToLowerInvariant()}/following");
+                var response = await _httpClient.GetAsync($"users/{username.ToLowerInvariant()}/following?page={page}");
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();

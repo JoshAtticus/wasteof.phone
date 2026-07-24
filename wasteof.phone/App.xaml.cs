@@ -36,6 +36,7 @@ namespace wasteof.phone
         {
             this.InitializeComponent();
             this.Suspending += this.OnSuspending;
+            this.Resuming += this.OnResuming;
         }
 
         /// <summary>
@@ -132,13 +133,81 @@ namespace wasteof.phone
         {
             var deferral = e.SuspendingOperation.GetDeferral();
 
-            // TODO: Save application state and stop any background activity
+            try
+            {
+                Services.SocketService.Instance.Disconnect();
+            }
+            catch { }
+
             deferral.Complete();
+        }
+
+        private void OnResuming(object sender, object e)
+        {
+            if (Services.ApiService.Instance.IsLoggedIn)
+            {
+                Services.SocketService.Instance.Connect();
+            }
         }
 
         protected override void OnActivated(IActivatedEventArgs args)
         {
             base.OnActivated(args);
+
+            if (args.Kind == ActivationKind.Protocol)
+            {
+                var protocolArgs = args as ProtocolActivatedEventArgs;
+                if (protocolArgs != null && protocolArgs.Uri != null)
+                {
+                    var uri = protocolArgs.Uri;
+                    string host = uri.Host;
+                    string path = uri.PathAndQuery;
+
+                    Frame rootFrame = Window.Current.Content as Frame;
+                    if (rootFrame == null)
+                    {
+                        rootFrame = new Frame();
+                        Window.Current.Content = rootFrame;
+                    }
+
+                    if (host.Equals("posts", StringComparison.OrdinalIgnoreCase) || host.Equals("post", StringComparison.OrdinalIgnoreCase))
+                    {
+                        string postId = path.TrimStart('/');
+                        int slashIdx = postId.IndexOf('/');
+                        if (slashIdx != -1) postId = postId.Substring(0, slashIdx);
+
+                        if (!string.IsNullOrEmpty(postId))
+                        {
+                            rootFrame.Navigate(typeof(PostDetailsPage), postId);
+                        }
+                        else
+                        {
+                            rootFrame.Navigate(typeof(MainPage));
+                        }
+                    }
+                    else if (host.Equals("users", StringComparison.OrdinalIgnoreCase) || host.Equals("user", StringComparison.OrdinalIgnoreCase))
+                    {
+                        string username = path.TrimStart('/');
+                        int slashIdx = username.IndexOf('/');
+                        if (slashIdx != -1) username = username.Substring(0, slashIdx);
+
+                        if (!string.IsNullOrEmpty(username))
+                        {
+                            rootFrame.Navigate(typeof(UserProfilePage), username);
+                        }
+                        else
+                        {
+                            rootFrame.Navigate(typeof(MainPage));
+                        }
+                    }
+                    else
+                    {
+                        rootFrame.Navigate(typeof(MainPage));
+                    }
+
+                    Window.Current.Activate();
+                }
+            }
 
             var continuationEventArgs = args as IContinuationActivatedEventArgs;
             if (continuationEventArgs != null)
